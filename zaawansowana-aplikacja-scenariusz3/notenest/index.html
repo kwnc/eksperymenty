@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteNest - Your Personal Note Management</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/themes.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body>
+    <div id="app">
+        <header id="main-header" class="hidden">
+            <nav class="navbar">
+                <div class="nav-brand">
+                    <h1>NoteNest</h1>
+                </div>
+                <div class="nav-actions">
+                    <button id="theme-toggle" class="btn-icon" title="Toggle Dark Mode">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/>
+                        </svg>
+                    </button>
+                    <button id="user-menu" class="btn-primary">Menu</button>
+                    <button id="logout-btn" class="btn-secondary">Logout</button>
+                </div>
+            </nav>
+        </header>
+
+        <main id="main-content">
+            <!-- Authentication View -->
+            <div id="auth-view" class="auth-container">
+                <div class="auth-card">
+                    <h2>Welcome to NoteNest</h2>
+                    <div id="login-form" class="auth-form">
+                        <h3>Login</h3>
+                        <input type="email" id="login-email" placeholder="Email" required>
+                        <input type="password" id="login-password" placeholder="Password" required>
+                        <button id="login-submit" class="btn-primary">Login</button>
+                        <p>Don't have an account? <a href="#" id="show-register">Register</a></p>
+                    </div>
+                    <div id="register-form" class="auth-form hidden">
+                        <h3>Register</h3>
+                        <input type="text" id="register-name" placeholder="Full Name" required>
+                        <input type="email" id="register-email" placeholder="Email" required>
+                        <input type="password" id="register-password" placeholder="Password" required>
+                        <button id="register-submit" class="btn-primary">Register</button>
+                        <p>Already have an account? <a href="#" id="show-login">Login</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Application View -->
+            <div id="app-view" class="hidden">
+                <aside id="sidebar">
+                    <div class="sidebar-section">
+                        <h3>Notebooks</h3>
+                        <button id="new-notebook" class="btn-secondary">+ New Notebook</button>
+                        <ul id="notebooks-list" class="sidebar-list">
+                            <!-- Notebooks will be populated here -->
+                        </ul>
+                    </div>
+                    <div class="sidebar-section">
+                        <h3>Quick Actions</h3>
+                        <button id="new-note" class="btn-primary">+ New Note</button>
+                        <button id="search-toggle" class="btn-secondary">Search</button>
+                        <button id="export-notes" class="btn-secondary">Export</button>
+                    </div>
+                </aside>
+
+                <div id="main-workspace">
+                    <div id="search-bar" class="hidden">
+                        <input type="text" id="search-input" placeholder="Search notes and tags...">
+                        <button id="search-btn" class="btn-primary">Search</button>
+                    </div>
+
+                    <div id="notes-list-view">
+                        <div id="notes-header">
+                            <h2 id="current-notebook-title">All Notes</h2>
+                            <div class="notes-actions">
+                                <select id="sort-notes">
+                                    <option value="modified">Last Modified</option>
+                                    <option value="created">Created Date</option>
+                                    <option value="title">Title</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="notes-list">
+                            <!-- Notes will be populated here -->
+                        </div>
+                    </div>
+
+                    <div id="note-editor" class="hidden">
+                        <div id="editor-toolbar">
+                            <button class="btn-icon" id="save-note" title="Save">💾</button>
+                            <button class="btn-icon" id="close-editor" title="Close">✕</button>
+                            <div class="editor-formatting">
+                                <button class="btn-icon" data-command="bold" title="Bold"><b>B</b></button>
+                                <button class="btn-icon" data-command="italic" title="Italic"><i>I</i></button>
+                                <button class="btn-icon" data-command="underline" title="Underline"><u>U</u></button>
+                            </div>
+                        </div>
+                        <input type="text" id="note-title" placeholder="Note title...">
+                        <div id="note-tags-input">
+                            <input type="text" id="note-tags" placeholder="Tags (comma-separated)...">
+                        </div>
+                        <div id="note-content" contenteditable="true" placeholder="Start writing your note..."></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modal for confirmations -->
+        <div id="modal-overlay" class="modal-overlay hidden">
+            <div class="modal">
+                <div id="modal-content">
+                    <!-- Dynamic modal content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/notes.js"></script>
+    <script src="assets/js/notebooks.js"></script>
+    <script src="assets/js/search.js"></script>
+    <script src="assets/js/export.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

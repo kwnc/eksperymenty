@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(tree:*)",
+      "Bash(open index.html)",
+      "Bash(find:*)",
+      "Bash(node:*)",
+      "Bash(open tests/test-runner.html)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

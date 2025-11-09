@@ -1,0 +1,155 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Bachelor's & Master's Thesis Template             %%
+%% Copyleft by Artur M. Brodzki & Piotr Woźniak      %%
+%% Faculty of Electronics and Information Technology %%
+%% Warsaw University of Technology, 2019-2020        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[
+    left=2.5cm,         % Sadly, generic margin parameter
+    right=2.5cm,        % doesnt't work, as it is
+    top=2.5cm,          % superseded by more specific
+    bottom=3cm,         % left...bottom parameters.
+    bindingoffset=6mm,  % Optional binding offset.
+    nohyphenation=false % You may turn off hyphenation, if don't like.
+]{ee/ee-thesis}
+
+\usepackage[backend=biber]{biblatex}
+\usepackage{caption}
+
+\langpol % Dla języka angielskiego mamy \langeng
+\graphicspath{{img/}}             % Katalog z obrazkami.
+\addbibresource{bibliografia.bib} % Plik .bib z bibliografią
+
+\begin{document}
+
+%--------------------------------------
+% Strona tytułowa
+%--------------------------------------
+\MasterThesis % Dla pracy inżynierskiej mamy \EngineerThesis
+\instytut{Elektrotechniki Teoretycznej i Systemów Informacyjno-Pomiarowych}
+\kierunek{Informatyka stosowana}
+\specjalnosc{Informatyka w Biznesie}
+\title{
+    Eksperymenty z systemami wieloagentowymi do tworzenia aplikacji biznesowych
+}
+\engtitle{ % Tytuł po angielsku do angielskiego streszczenia
+    Experiments with multi-agent systems for creating business applications
+}
+\author{inż Konrad Wenc}
+\album{330586}
+\promotor{dr hab. inż. Bartosz Sawicki}
+\date{\the\year}
+\maketitle
+
+%--------------------------------------
+% Streszczenie po polsku
+%--------------------------------------
+\cleardoublepage
+\streszczenie
+Rozwój oprogramowania staje się coraz bardziej złożony, co prowadzi do poszukiwania nowych narzędzi i technologii wspomagających pracę programistów. W ostatnich latach sztuczna inteligencja (AI) zyskała na znaczeniu w różnych aspektach tworzenia oprogramowania, oferując narzędzia automatyzujące zadania, zwiększające efektywność oraz poprawiające jakość kodu. Celem tej pracy jest zbadanie roli agentów AI w procesie tworzenia oprogramowania poprzez przeprowadzenie serii eksperymentów mających na celu ocenę ich użyteczności, wydajności oraz wpływu na jakość oprogramowania.
+
+Praca rozpoczyna się od przeglądu literatury, który prezentuje aktualny stan wiedzy na temat zastosowania AI w rozwoju oprogramowania. Następnie przedstawiono metodologię badań, obejmującą projekt eksperymentu, wybór narzędzi oraz sposób zbierania i analizy danych. W ramach eksperymentów zbadano wydajność wybranych agentów AI w kontekście różnych zadań programistycznych, takich jak generowanie kodu, refaktoryzacja, testowanie i debugowanie.
+
+Wyniki eksperymentów pokazują, że agenty AI mogą znacząco wspomagać programistów w codziennych zadaniach, szczególnie w obszarach automatyzacji i optymalizacji. Jednakże praca ujawnia także pewne ograniczenia technologii AI, w tym wyzwania związane z dokładnością generowanego kodu i jego integracją z istniejącymi systemami. Na podstawie tych wyników przeprowadzono analizę porównawczą tradycyjnych metod programowania z metodami wspomaganymi przez AI.
+\slowakluczowe LLM, agent, rozwój oprogramowania
+
+%--------------------------------------
+% Streszczenie po angielsku
+%--------------------------------------
+\newpage
+\abstract
+Software development is becoming increasingly complex, which leads to the search for new tools and technologies to support the work of programmers. In recent years, artificial intelligence (AI) has gained importance in various aspects of software development, offering tools that automate tasks, increase efficiency, and improve code quality. The aim of this work is to investigate the role of AI agents in the software development process by conducting a series of experiments to assess their usability, performance, and impact on software quality.
+
+The work begins with a literature review that presents the current state of knowledge on the use of AI in software development. Then, the research methodology is presented, including the experimental design, tool selection, and data collection and analysis method. The experiments examine the performance of selected AI agents in the context of various programming tasks, such as code generation, refactoring, testing, and debugging.
+
+The results of the experiments show that AI agents can significantly support programmers in their daily tasks, especially in the areas of automation and optimization. However, the work also reveals some limitations of AI technologies, including challenges related to the accuracy of the generated code and its integration with existing systems. Based on these results, a comparative analysis was conducted between traditional programming methods and AI-assisted methods.
+\keywords LLM, agent, software development
+
+%--------------------------------------
+% Oświadczenie o autorstwie
+%--------------------------------------
+\cleardoublepage
+\pagestyle{plain}
+\makeauthorship
+
+%--------------------------------------
+% Spis treści
+%--------------------------------------
+\cleardoublepage
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+%--------------------------------------
+% Rozdziały
+%--------------------------------------
+\cleardoublepage
+\pagestyle{headings}
+
+\input{tex/1-wstep}
+\input{tex/2-modele-jezykowe}
+\input{tex/3-narzedzia}
+\input{tex/4-eksperymenty}
+\input{tex/5-implementacja}
+\section{Podsumowanie}
+
+Praca miała na celu empiryczną ocenę wpływu agentów AI opartych na dużych modelach językowych (LLM) na proces tworzenia oprogramowania, ze szczególnym uwzględnieniem różnych konfiguracji systemów agentowych. W ramach badań zrealizowano trzy główne eksperymenty oraz rzeczywistą implementację aplikacji biznesowej, aby zweryfikować skuteczność systemów agentowych w zróżnicowanych scenariuszach wytwarzania oprogramowania.
+
+W części teoretycznej przedstawiono fundamenty działania modeli językowych, w tym architekturę Transformer, mechanizmy tokenizacji i osadzania wektorowego oraz kluczowe ograniczenia współczesnych LLM. Szczególną uwagę poświęcono koncepcji agentów AI jako rozszerzeń modeli językowych wyposażonych w narzędzia, pamięć i zdolności rozumowania. Przeanalizowano również systemy wieloagentowe (MAS), w których wyspecjalizowani agenci współpracują w ramach zdefiniowanych ról, co pozwala na dekompozycję złożonych zadań programistycznych.
+
+W części eksperymentalnej przeprowadzono serię kontrolowanych testów z trzema konfiguracjami systemu agentowego: pojedynczy agent uniwersalny, układ dwuagentowy (architekt-programista) oraz autonomiczny system wieloagentowy (manager-architekt-programista-recenzent). Każda konfiguracja została przetestowana w trzech scenariuszach o rosnącej złożoności: proste zapytanie bez dokumentacji, zapytanie z podstawową specyfikacją oraz zapytanie z zaawansowaną dokumentacją techniczną. Wygenerowane aplikacje oceniano w czterech kategoriach: funkcjonalność, interfejs użytkownika, estetyka oraz brak błędów.
+
+Wyniki eksperymentów ujawniły wyraźną zależność między szczegółowością dokumentacji wejściowej a optymalną konfiguracją systemu agentowego. Dla prostych zadań bez specyfikacji pojedynczy agent osiągał najlepsze rezultaty przy minimalnym narzucie organizacyjnym. Wprowadzenie podstawowej specyfikacji sprawiło, że układy dwu- i wieloagentowe znacząco poprawiły jakość odwzorowania wymagań oraz estetykę interfejsu. W przypadku zaawansowanej dokumentacji technicznej wyłącznie system wieloagentowy był w stanie zrealizować pełen zakres funkcjonalności przy zachowaniu spójności architektonicznej i stabilności działania.
+
+Praktyczną walidację wniosków stanowiła implementacja aplikacji biznesowej AutoServe - portalu do zarządzania serwisem samochodowym. System wieloagentowy autonomicznie opracował architekturę local-first opartą o React, TypeScript i IndexedDB, przeprowadził implementację w pięciu sprintach oraz zapewnił warstwę testów jednostkowych. Aplikacja finalna składała się z 39 plików źródłowych i spełniała większość wymagań funkcjonalnych MVP. Proces wytwórczy trwał około godziny i wykazał zdolność systemu do samodzielnego doboru stosu technologicznego oraz realizacji złożonych scenariuszy biznesowych.
+
+Najważniejsze wnioski z badań to: systemy agentowe wykazują realny potencjał w automatyzacji wytwarzania oprogramowania, szczególnie przy dobrze zdefiniowanych wymaganiach; efektywność rozwiązania nie rośnie liniowo ze wzrostem liczby agentów - wymaga to skutecznych mechanizmów koordynacji i kontroli jakości; pojedynczy agent pozostaje optymalny dla prototypowania prostych aplikacji, natomiast konfiguracje wieloagentowe znajdują uzasadnienie w projektach o wysokiej złożoności funkcjonalnej; jakość dokumentacji wejściowej bezpośrednio determinuje skuteczność systemu agentowego - im bardziej precyzyjne wymagania, tym lepsze odwzorowanie w kodzie.
+
+Przeprowadzone badania potwierdzają tezę, że agenty AI stanowią wartościowe narzędzie wspierające proces wytwarzania oprogramowania. Jednakże ich skuteczność jest warunkowa i zależy od dopasowania konfiguracji systemu do specyfiki zadania oraz jakości dokumentacji wymagań. Dalsze badania powinny skupić się na mechanizmach koordynacji w większych zespołach agentowych, metodach automatycznej walidacji jakości generowanego kodu oraz długoterminowych kosztach utrzymania aplikacji wytworzonych przez systemy agentowe.
+
+
+\newpage
+
+%--------------------------------------------
+% Literatura
+%--------------------------------------------
+\cleardoublepage
+\printbibliography
+
+%--------------------------------------------
+% Spisy (opcjonalne)
+%--------------------------------------------
+\newpage
+\pagestyle{plain}
+
+% Wykaz symboli i skrótów.
+% Pamiętaj, żeby posortować symbole alfabetycznie
+% we własnym zakresie. Ponieważ mało kto używa takiego wykazu,
+% uznałem, że robienie automatycznie sortowanej listy
+% na poziomie LaTeXa to za duży overkill.
+% Makro \acronymlist generuje właściwy tytuł sekcji,
+% w zależności od języka.
+% Makro \acronym dodaje skrót/symbol do listy,
+% zapewniając podstawowe formatowanie.
+% //AB
+\vspace{0.8cm}
+\acronymlist
+\acronym{EE}{Wydział Elektryczny}
+\acronym{PW}{Politechnika Warszawska}
+\acronym{WEIRD}{ang. \emph{Western, Educated, Industrialized, Rich and Democratic}}
+
+\listofappendicestoc  % Spis załączników
+
+% Załączniki
+\newpage
+\appendix{Nazwa załącznika 1}
+
+\newpage
+\appendix{Nazwa załącznika 2}
+
+% Używając powyższych spisów jako szablonu,
+% możesz tu dodać swój własny wykaz bądź listę,
+% np. spis algorytmów.
+
+\end{document}

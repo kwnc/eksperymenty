@@ -1,0 +1,197 @@
+/* NoteNest Theme System */
+
+/* Default Light Theme (already defined in main.css via :root) */
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --primary-color: #FF9A3C;           /* Warmer orange for dark theme */
+  --secondary-color: #2C2C2C;         /* Dark gray */
+  --accent-color: #64B5F6;            /* Lighter blue for better contrast */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --background-primary: #121212;      /* True dark background */
+  --background-secondary: #1E1E1E;    /* Slightly lighter dark */
+  --border-color: #333333;
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.5);
+}
+
+/* High Contrast Theme */
+[data-theme="high-contrast"] {
+  --primary-color: #FF6600;
+  --secondary-color: #000000;
+  --accent-color: #0099FF;
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --background-primary: #FFFFFF;
+  --background-secondary: #F0F0F0;
+  --border-color: #000000;
+  --shadow-light: rgba(0, 0, 0, 0.8);
+  --shadow-medium: rgba(0, 0, 0, 0.9);
+}
+
+/* Sepia Theme (for reading comfort) */
+[data-theme="sepia"] {
+  --primary-color: #8B4513;           /* Saddle brown */
+  --secondary-color: #F4F1E8;         /* Cream */
+  --accent-color: #CD853F;            /* Peru */
+  --text-primary: #3C2415;            /* Dark brown */
+  --text-secondary: #6B4423;          /* Medium brown */
+  --background-primary: #FDF6E3;      /* Light cream */
+  --background-secondary: #F4F1E8;    /* Cream */
+  --border-color: #D4C5A9;            /* Light brown */
+  --shadow-light: rgba(60, 36, 21, 0.1);
+  --shadow-medium: rgba(60, 36, 21, 0.15);
+}
+
+/* Blue Theme */
+[data-theme="blue"] {
+  --primary-color: #1976D2;           /* Material Blue */
+  --secondary-color: #E3F2FD;         /* Light Blue */
+  --accent-color: #FF5722;            /* Deep Orange accent */
+  --text-primary: #0D47A1;            /* Dark Blue */
+  --text-secondary: #1565C0;          /* Medium Blue */
+  --background-primary: #FAFAFA;
+  --background-secondary: #F5F5F5;
+  --border-color: #BBDEFB;            /* Light Blue border */
+  --shadow-light: rgba(25, 118, 210, 0.1);
+  --shadow-medium: rgba(25, 118, 210, 0.15);
+}
+
+/* Green Theme */
+[data-theme="green"] {
+  --primary-color: #2E7D32;           /* Material Green */
+  --secondary-color: #E8F5E8;         /* Light Green */
+  --accent-color: #FF9800;            /* Orange accent */
+  --text-primary: #1B5E20;            /* Dark Green */
+  --text-secondary: #388E3C;          /* Medium Green */
+  --background-primary: #FAFAFA;
+  --background-secondary: #F5F5F5;
+  --border-color: #C8E6C9;            /* Light Green border */
+  --shadow-light: rgba(46, 125, 50, 0.1);
+  --shadow-medium: rgba(46, 125, 50, 0.15);
+}
+
+/* Theme-specific component adjustments */
+
+/* Dark theme specific styles */
+[data-theme="dark"] .card {
+  background-color: var(--background-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: var(--background-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+/* High contrast adjustments */
+[data-theme="high-contrast"] button {
+  border: 2px solid var(--text-primary);
+  font-weight: 600;
+}
+
+[data-theme="high-contrast"] .card {
+  border: 2px solid var(--border-color);
+}
+
+[data-theme="high-contrast"] input,
+[data-theme="high-contrast"] textarea,
+[data-theme="high-contrast"] select {
+  border: 2px solid var(--border-color);
+}
+
+/* Theme transition animations */
+* {
+  transition:
+    background-color var(--transition-normal),
+    border-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+/* Theme toggle button styles */
+.theme-toggle {
+  position: relative;
+  padding: var(--spacing-xs);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Custom scrollbars for dark theme */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Media query for respecting user's system preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-color: #FF9A3C;
+    --secondary-color: #2C2C2C;
+    --accent-color: #64B5F6;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --background-primary: #121212;
+    --background-secondary: #1E1E1E;
+    --border-color: #333333;
+    --shadow-light: rgba(0, 0, 0, 0.3);
+    --shadow-medium: rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Override system preference when user has selected a theme */
+[data-theme] {
+  color-scheme: light dark;
+}
+
+/* Print styles */
+@media print {
+  :root {
+    --primary-color: #000000;
+    --secondary-color: #FFFFFF;
+    --accent-color: #000000;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --background-primary: #FFFFFF;
+    --background-secondary: #FFFFFF;
+    --border-color: #000000;
+  }
+
+  .theme-toggle,
+  .btn-primary,
+  .btn-secondary,
+  .btn-accent {
+    display: none;
+  }
+}

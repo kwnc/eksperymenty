@@ -1,0 +1,100 @@
+\raggedbottom
+\newpage
+\section{Implementacja aplikacji biznesowej przy użyciu systemu agentowego}
+Niniejszy rozdział dokumentuje wdrożenie portalu sieciowego do zarządzania serwisem samochodowym. Implementacja odpowiada trzeciemu scenariuszowi eksperymentów zaprezentowanemu na rysunku \ref{fig:architektura-wieloagentowa}, w którym konfiguracja wieloagentowa (Manager, Architekt, Programista, Recenzent) zasilana modelem Claude Opus 4 uzyskała najwyższe noty za kompletność oraz jakość. Celem iteracji było przejście pełnego cyklu wytwórczego: od planu technicznego, przez implementację, integrację z systemami zewnętrznymi i testy, po przygotowanie artefaktów wdrożeniowych.
+
+Jako przypadek użycia systemu agentowego wybrano aplikację webową o nazwie AutoServe przeznaczoną dla właścicieli serwisów samochodowych, którzy chcą cyfrowo zarządzać swoim biznesem. Decyzja miała podkreślić zdolność LLM do generowania aplikacji spoza typowych repozytoriów kodu, w których modele były szeroko trenowane. Modele językowe bardzo dobrze radzą sobie z popularnymi aplikacjami, takimi jak notatniki czy listy zadań, ponieważ w repozytoriach otwartych źródłowo występuje wiele kompletnych implementacji tego typu systemów. Dla portali dedykowanych warsztatom samochodowym liczba dostępnych przykładów jest niewielka, co zwiększa wartość demonstracji.
+
+\subsection{Obserwacja pracy systemu wieloagentowego}
+Prace rozpoczęto od opracowania szczegółowej specyfikacji aplikacji do wygenerowania (załącznik), obejmującej scenariusze pracy serwisu oraz oczekiwane moduły biznesowe. Przekazano agentom wyłącznie ten artefakt, aby system samodzielnie podjął decyzje dotyczące technologii, struktury projektu oraz zakresu pierwszej inkrementacji. Agent Architekt przeanalizował dokument wymagań aplikacji (specification.md) i określił zakres MVP (Minimum Viable Product), czyli minimalnej wersji produktu. Agent następnie opracował plan implementacji podzielony na 5 sprintów, grupujących zadania według funkcjonalności aplikacji. W ramach planowania agent wybrał następujący stos technologiczny: React 18 z TypeScript, Vite jako bundler, Zustand do zarządzania stanem aplikacji, Dexie.js jako warstwę abstrakcji nad IndexedDB, Tailwind CSS w warstwie prezentacji oraz shadcn/ui jako bibliotekę komponentów interfejsu użytkownika.
+
+Agent Architekt, bazując na autonomicznie dobranym stosie technologicznym, przygotował szczegółową dokumentację techniczną (ARCHITECTURE.md). Agent zdecydował o architekturze local-first, w której wszystkie dane przechowywane są lokalnie w przeglądarce użytkownika za pomocą IndexedDB, bez zależności od backendu. Model danych obejmuje trzy główne encje: \texttt{customers} (klienci serwisu z danymi kontaktowymi), \texttt{vehicles} (pojazdy przypisane do klientów z danymi identyfikacyjnymi, jak VIN i numer rejestracyjny) oraz \texttt{work\_orders} (zlecenia serwisowe ze statusem, pozycjami robocizny i części oraz obliczeniami kosztów).
+
+W następnym kroku Agent Architekt zlecił kontynuację nad projektem Agentowi Programiście, który przeprowadził implementację według planu podzielonego na 5 sprintów. Każdy cykl obejmował plan prac, modyfikacje kodu oraz lokalną weryfikację. Najważniejsze kroki przedstawiono poniżej:
+\begin{enumerate}
+    \item \textbf{Sprint 1: Fundament} -- wygenerowanie szkieletu projektu Vite z React i TypeScript, konfiguracja TypeScript (\texttt{tsconfig.json}, \texttt{tsconfig.app.json}), Tailwind CSS oraz instalacja i konfiguracja biblioteki komponentów shadcn/ui. Utworzono podstawową strukturę routingu z wykorzystaniem React Router oraz komponenty layoutu (Header, Navigation, MainLayout).
+    \item \textbf{Sprint 2: Warstwa danych} -- implementacja schematu bazy danych w Dexie.js z trzema tabelami (\texttt{customers}, \texttt{vehicles}, \texttt{workOrders}) oraz odpowiednimi indeksami. Utworzono definicje typów TypeScript dla encji domenowych oraz zaimplementowano trzy store'y Zustand (\texttt{customerStore}, \texttt{vehicleStore}, \texttt{workOrderStore}) z mechanizmem zapisywania danych do IndexedDB i optymistycznymi aktualizacjami.
+    \item \textbf{Sprint 3: Zarządzanie klientami} -- utworzenie strony listy klientów (\texttt{Customers.tsx}) z funkcją wyszukiwania i filtrowania, formularza klienta (\texttt{CustomerForm.tsx}) z walidacją Zod, widoku szczegółów klienta (\texttt{CustomerDetail.tsx}) z historią serwisową oraz modułu zarządzania pojazdami (\texttt{VehicleForm.tsx}).
+    \item \textbf{Sprint 4: Zarządzanie zleceniami} -- implementacja strony listy zleceń serwisowych (\texttt{WorkOrders.tsx}) z filtrowaniem po statusie, formularza tworzenia zlecenia z dynamicznym dodawaniem pozycji kosztów, widoku szczegółów zlecenia z możliwością zmiany statusu oraz generowania wydruku faktury (\texttt{WorkOrderPrint.tsx}).
+    \item \textbf{Sprint 5: Dashboard i finalizacja} -- budowa pulpitu głównego (\texttt{Dashboard.tsx}) z kluczowymi metrykami (liczba aktywnych zleceń, przychody, alerty), implementacja strony ustawień (\texttt{Settings.tsx}) z funkcjami eksportu i importu danych w formacie JSON, oraz dopracowanie interfejsu użytkownika zgodnie ze specyfikacją kolorystyczną (\#0C5EAF jako kolor główny, \#F2F5F9 dla tła).
+\end{enumerate}
+
+\subsection{Operacje agenta Recenzent}
+Agent Recenzent weryfikował każdą partię zmian pod kątem jakości kodu, zgodności z wymaganiami oraz potencjalnych błędów. Ze względu na architekturę local-first aplikacji, nie wystąpiły problemy związane z synchronizacją z backendem czy uprawnieniami użytkowników -- aplikacja działa w trybie jednoużytkownikowym bez warstwy serwerowej. Validator skupił się na walidacji poprawności logiki biznesowej, obsługi błędów IndexedDB oraz spójności interfejsu użytkownika. Finałowy raport obejmował analizę struktury projektu oraz pokrycie testów.
+
+Warstwa jakości opierała się na frameworku testowym Vitest. Przygotowano testy jednostkowe obejmujące logikę store'ów Zustand (operacje CRUD na encjach, kalkulację sum zleceń), funkcje pomocnicze w \texttt{src/lib/utils.ts} oraz walidację schematów Zod. Testy komponentów z wykorzystaniem React Testing Library weryfikowały poprawność renderowania formularzy, interakcje użytkownika oraz warunkowe wyświetlanie elementów UI. Skonfigurowano również ESLint z presetami dla React i TypeScript oraz Prettier dla zapewnienia spójnego formatowania kodu. Ze względu na ograniczenia czasowe MVP, nie zaimplementowano testów end-to-end, co zostało odnotowane jako obszar do rozwoju w kolejnych iteracjach.
+
+\subsection{Interfejs użytkownika aplikacji}
+Wygenerowana aplikacja charakteryzuje się nowoczesnym i przejrzystym interfejsem użytkownika, zgodnym z dostarczoną specyfikacją. Poniżej zaprezentowano zrzuty ekranu kluczowych widoków aplikacji.
+
+Rysunek \ref{fig:screenshot-dashboard} przedstawia pulpit główny aplikacji. Jest to pierwszy ekran, który widzi użytkownik po uruchomieniu aplikacji. Zawiera on kluczowe wskaźniki wydajności (KPI), takie jak liczba otwartych zleceń, suma przychodów z ostatnich 30 dni oraz skróty do najczęściej używanych funkcji, takich jak dodawanie nowego klienta czy zlecenia. Projekt interfejsu jest minimalistyczny, z wyraźnym naciskiem na czytelność danych.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{img/dashboard.png}
+    \caption{Pulpit główny aplikacji AutoServe, prezentujący kluczowe metryki i skróty do najważniejszych funkcji.}
+    \label{fig:screenshot-dashboard}
+\end{figure}
+
+Na rysunku \ref{fig:screenshot-customers} widoczny jest widok listy klientów. Umożliwia on przeglądanie wszystkich zapisanych klientów wraz z ich podstawowymi danymi kontaktowymi. Użytkownik ma możliwość wyszukiwania klientów po imieniu, nazwisku lub numerze telefonu. Z tego poziomu można również przejść do edycji danych klienta lub dodać nowego klienta do bazy, co jest kluczową funkcją w codziennej pracy serwisu.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{img/customers-list.png}
+    \caption{Widok listy klientów z funkcją wyszukiwania i możliwością dodania nowego klienta.}
+    \label{fig:screenshot-customers}
+\end{figure}
+
+Rysunek \ref{fig:screenshot-work-order} prezentuje formularz tworzenia nowego zlecenia serwisowego. Jest to jeden z bardziej złożonych interfejsów w aplikacji. Formularz pozwala na przypisanie zlecenia do istniejącego klienta i pojazdu, a także na dynamiczne dodawanie pozycji serwisowych, zarówno usług, jak i części. System automatycznie oblicza sumę kosztów, co minimalizuje ryzyko pomyłek. Interfejs został zaprojektowany tak, aby prowadzić użytkownika krok po kroku przez proces tworzenia zlecenia.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{img/work-order-form.png}
+    \caption{Formularz tworzenia nowego zlecenia serwisowego z dynamicznie dodawanymi pozycjami.}
+    \label{fig:screenshot-work-order}
+\end{figure}
+
+\clearpage
+
+\subsection{Ocena efektywności procesu}
+Proces implementacji przeprowadzono w ramach sesji z systemem wieloagentowym, która trwała około dwóch godzin. Całość prac obejmowała fazę planowania (agent Architekt), implementację (agent Builder) oraz walidację (agent Validator). System wygenerował kompletną aplikację MVP spełniającą część wymagań funkcjonalnych określonych w specyfikacji. Dzięki architekturze local-first, aplikacja mogła być uruchomiona bez dodatkowych konfiguracji żadnych zewnętrznych usług czy kluczy API, a wszystkie dane są przechowywane lokalnie w przeglądarce użytkownika.
+
+Projekt finalnie liczy 39 plików źródłowych w języku TypeScript oraz 7 plików konfiguracyjnych. Struktura katalogów obejmuje: 14 komponentów UI w katalogu \texttt{src/components}, 7 stron aplikacji w katalogu \texttt{src/pages}, warstwę bazodanową Dexie.js w \texttt{src/db} oraz funkcje pomocnicze w \texttt{src/lib}. Aplikacja wykorzystuje 29 zależności produkcyjnych (m.in. React, Zustand, Dexie, Zod, date-fns, lucide-react) oraz 21 zależności deweloperskich (m.in. Vite, TypeScript, ESLint, Vitest, Testing Library).
+
+\begin{figure}[!h]
+    \centering \includegraphics[width=0.8\linewidth]{img/functionalities-pie-chart.png}
+    \caption{Podział funkcjonalności na zaimplementowane i niezaimplementowane}
+    \label{fig:wykres-kolowy-implementacji}
+\end{figure}
+
+Z 63 funkcjonalności zaplanowanych w specyfikacji, system agentowy zaimplementował 29 (46\%), pozostawiając 34 (54\%) jak pokazano na rysunku \ref{fig:wykres-kolowy-implementacji}. Interfejs użytkownika oraz estetyka uzyskały notę 5, natomiast kategoria funkcjonalność otrzymała 3, a brak błędów 4 ze względu na błąd w konfiguracji stylizacji aplikacji, którą recenzent musiał samodzielnie poprawić w pliku \texttt{tailwind.config.js}.
+
+\subsection{Wnioski}
+Implementacja AutoServe pokazała, że wieloagentowa konfiguracja sprawdza się przy złożonych aplikacjach biznesowych, o ile towarzyszy jej precyzyjny dokument wymagań oraz jasna definicja zakresu MVP oraz ścisła kontrola jakości. Największą wartość wniosła szczegółowa dokumentacja architektoniczna (ARCHITECTURE.md) przygotowana przez agenta Architekt, która stanowiła punkt odniesienia dla agenta Programisty podczas implementacji. Jasno zdefiniowane wzorce architektoniczne (local-first, optymistyczne aktualizacje, persystencja z Zustand) pozwoliły uniknąć problemów projektowych na etapie kodowania.
+
+System wieloagentowy wykazał się szczególną skutecznością w wyborze odpowiedniego stosu technologicznego - decyzja o architekturze local-first była trafna dla przypadku użycia (brak potrzeby wdrażania oprogramowania na serwerze). Wybór Dexie.js jako warstwy abstrakcji nad IndexedDB oraz Zustand jako lekkiego state managera okazał się optymalny dla aplikacji MVP, pozwalając na bezproblemową implementację. W tabeli \ref{table:wyniki-wygenerowanej-aplikacji-biznesowej} przedstawiono wyniki wygenerowanej aplikacji analogicznie do poprzedniego eksperymentu.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    & \textbf{Ocena} \\
+    \hline
+    \textbf{funkcjonalność} & 3 \\
+    \hline
+    \textbf{interfejs użytkownika} & 5 \\
+    \hline
+    \textbf{estetyka} & 5 \\
+    \hline
+    \textbf{brak błędów} & 4 \\
+    \hline
+    \textbf{czas generowania} & 2 h \\
+    \hline
+    \end{tabular}
+    \caption{Wyniki wygenerowanej aplikacji biznesowej}
+    \label{table:wyniki-wygenerowanej-aplikacji-biznesowej}
+\end{table}
+
+Na kolejne iteracje eksperymentu rekomenduje się rozszerzenie pokrycia testowego o testy end-to-end z wykorzystaniem Playwright lub Cypress, które zweryfikują pełne scenariusze użytkownika (od utworzenia klienta, przez rejestrację pojazdu, po wygenerowanie zlecenia i faktury) tak, aby zbadać, czy system agentowy zaimplementowałby zaawansowane funkcje zaplanowane w dokumentacji architektonicznej, takie jak: wsparcie dla skrótów klawiszowych oraz widok kalendarza z nadchodzącymi wizytami klientów. Doświadczenie z AutoServe potwierdza, że system agentowy może samodzielnie wygenerować aplikację biznesową o jakości MVP, jeśli otrzyma dobrze zdefiniowane wymagania funkcjonalne i niefunkcjonalne.
+
+\clearpage

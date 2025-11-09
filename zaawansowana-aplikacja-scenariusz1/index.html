@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteNest - Your Personal Note Taking App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="loginForm" class="auth-form">
+                <h2>Login to NoteNest</h2>
+                <form id="loginFormEl">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+                <p>Don't have an account? <a href="#" id="showRegister">Register here</a></p>
+            </div>
+            <div id="registerForm" class="auth-form hidden">
+                <h2>Register for NoteNest</h2>
+                <form id="registerFormEl">
+                    <input type="text" id="registerName" placeholder="Full Name" required>
+                    <input type="email" id="registerEmail" placeholder="Email" required>
+                    <input type="password" id="registerPassword" placeholder="Password" required>
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                    <button type="submit">Register</button>
+                </form>
+                <p>Already have an account? <a href="#" id="showLogin">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fas fa-sticky-note"></i>
+                <h1>NoteNest</h1>
+            </div>
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search notes and tags...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <button id="newNoteBtn" class="btn-primary">
+                    <i class="fas fa-plus"></i> New Note
+                </button>
+                <div class="user-menu">
+                    <button id="userMenuBtn">
+                        <i class="fas fa-user"></i>
+                        <span id="userName">User</span>
+                    </button>
+                    <div id="userDropdown" class="dropdown hidden">
+                        <a href="#" id="profileBtn">Profile</a>
+                        <a href="#" id="settingsBtn">Settings</a>
+                        <a href="#" id="logoutBtn">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>Notebooks</h3>
+                    <button id="newNotebookBtn" class="btn-secondary">
+                        <i class="fas fa-plus"></i> New Notebook
+                    </button>
+                    <ul id="notebooksList" class="notebooks-list">
+                        <li class="notebook-item active" data-notebook="all">
+                            <i class="fas fa-book"></i>
+                            <span>All Notes</span>
+                            <span class="note-count">0</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Tags</h3>
+                    <ul id="tagsList" class="tags-list">
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Notes List -->
+            <div class="notes-panel">
+                <div class="notes-header">
+                    <h2 id="notesPanelTitle">All Notes</h2>
+                    <div class="notes-actions">
+                        <button id="sortBtn" class="btn-icon">
+                            <i class="fas fa-sort"></i>
+                        </button>
+                        <button id="viewModeBtn" class="btn-icon">
+                            <i class="fas fa-th-list"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="notesList" class="notes-list">
+                    <div class="empty-state">
+                        <i class="fas fa-sticky-note"></i>
+                        <h3>No notes yet</h3>
+                        <p>Create your first note to get started!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Note Editor -->
+            <div class="editor-panel">
+                <div id="editorPlaceholder" class="editor-placeholder">
+                    <i class="fas fa-edit"></i>
+                    <h3>Select a note to edit</h3>
+                    <p>Choose a note from the list or create a new one</p>
+                </div>
+
+                <div id="noteEditor" class="note-editor hidden">
+                    <div class="editor-header">
+                        <input type="text" id="noteTitle" placeholder="Note title..." class="note-title-input">
+                        <div class="editor-actions">
+                            <button id="saveNoteBtn" class="btn-primary">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button id="exportBtn" class="btn-secondary">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <button id="shareBtn" class="btn-secondary">
+                                <i class="fas fa-share"></i> Share
+                            </button>
+                            <button id="deleteNoteBtn" class="btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="editor-toolbar">
+                        <button class="toolbar-btn" data-command="bold"><i class="fas fa-bold"></i></button>
+                        <button class="toolbar-btn" data-command="italic"><i class="fas fa-italic"></i></button>
+                        <button class="toolbar-btn" data-command="underline"><i class="fas fa-underline"></i></button>
+                        <div class="toolbar-divider"></div>
+                        <button class="toolbar-btn" data-command="insertUnorderedList"><i class="fas fa-list-ul"></i></button>
+                        <button class="toolbar-btn" data-command="insertOrderedList"><i class="fas fa-list-ol"></i></button>
+                        <div class="toolbar-divider"></div>
+                        <button class="toolbar-btn" data-command="createLink"><i class="fas fa-link"></i></button>
+                        <button class="toolbar-btn" data-command="insertImage"><i class="fas fa-image"></i></button>
+                    </div>
+
+                    <div class="editor-content">
+                        <div id="richTextEditor" contenteditable="true" class="rich-text-editor" placeholder="Start writing your note..."></div>
+                    </div>
+
+                    <div class="editor-footer">
+                        <div class="note-meta">
+                            <div class="notebook-selector">
+                                <label>Notebook:</label>
+                                <select id="noteNotebook">
+                                    <option value="">Select notebook...</option>
+                                </select>
+                            </div>
+                            <div class="tags-input">
+                                <label>Tags:</label>
+                                <input type="text" id="noteTags" placeholder="Add tags (comma separated)">
+                            </div>
+                        </div>
+                        <div class="note-stats">
+                            <span id="wordCount">0 words</span>
+                            <span id="lastSaved">Not saved</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="notebookModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create New Notebook</h2>
+            <form id="notebookForm">
+                <input type="text" id="notebookName" placeholder="Notebook name" required>
+                <input type="text" id="notebookDescription" placeholder="Description (optional)">
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelNotebook">Cancel</button>
+                    <button type="submit" class="btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Export Note</h2>
+            <div class="export-options">
+                <button class="export-option" data-format="pdf">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Export as PDF</span>
+                </button>
+                <button class="export-option" data-format="markdown">
+                    <i class="fab fa-markdown"></i>
+                    <span>Export as Markdown</span>
+                </button>
+                <button class="export-option" data-format="html">
+                    <i class="fas fa-code"></i>
+                    <span>Export as HTML</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

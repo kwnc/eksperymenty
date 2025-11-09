@@ -1,0 +1,145 @@
+\newpage
+\section{Wprowadzenie do modeli językowych i systemów agentowych}
+Duże modele językowe (ang. \textit{Large Language Models}, w skrócie LLM) stanowią jeden z ważniejszych przełomów w sztucznej inteligencji i dziedzinie przetwarzania języka naturalnego. Potwierdza to fakt, że praca badawcza „Attention is All You Need" \cite{vaswani2023attentionneed} jest jedną z najczęściej cytowanych prac XXI wieku \cite{wikipediaAttentionNeed}. W swojej istocie modele te, oparte na architekturze Transformer, są zaawansowanymi systemami rozpoznawania wzorców w ogromnych zbiorach tekstu. Dzięki mechanizmowi uwagi efektywnie analizują zależności między różnymi częściami tekstu, co prowadzi do lepszego rozumienia języka i kontekstu, a w konsekwencji umożliwia przewidywanie kolejnych słów w sekwencji.
+
+Współczesne modele językowe dzięki nauczaniu maszynowemu na danych pochodzących z różnych dziedzin nauki i dyscyplin, pozwalają na uzyskiwanie odpowiedzi na temat różnych dyscyplin. Wszechstronność LLM-ów doprowadziła do ich przyjęcia w wielu dziedzinach nauki. Doskonale sprawdzają się w tworzeniu treści i pomocy w pisaniu. W rozwoju oprogramowania jako narzędzia do generowania kodu i debugowania stają się coraz popularniejsze, często wyłapując subtelne błędy, które ludzie mogliby przeoczyć. Ich zdolność do rozumienia i analizowania tekstu sprawia, że są potężnymi narzędziami do pomocy w badaniach i analizie danych, podczas gdy ich zdolności rozumienia języka umożliwiają wykonywanie takich zadań jak tłumaczenia i podsumowania, po bardziej zaawansowane jak analiza sentymentu tekstu. Jednakże ich ogromne rozmiary wiążą się także z wyzwaniami, takimi jak wysoki koszt obliczeniowy, duże zużycie energii oraz problemy związane z halucynacjami (generowanie błędnych informacji). W tej pracy umiejętność generowania kodu programów zostanie poddana analizie.
+
+\subsection{Transformer}
+Transformer jest fundamentalną architekturą sieci neuronowych, na której opierają się nowoczesne modele językowe, takie jak ChatGPT (\textit{Generative Pre-trained Transformer}), który zawiera architekturę transformera w nazwie. Architektura Transformer, wprowadzona w przełomowej pracy "Attention is All You Need" \cite{vaswani2023attentionneed}, stanowi kamień milowy w rozwoju modeli językowych. W przeciwieństwie do tradycyjnych rekurencyjnych sieci neuronowych (RNN) czy sieci konwolucyjnych (CNN), Transformer wykorzystuje mechanizm uwagi (z ang. \textit{attention mechanism}), który pozwala na równoległe przetwarzanie sekwencji wejściowych i efektywne modelowanie zależności długodystansowych w tekście. Ta innowacyjna architektura stała się podstawą dla współczesnych modeli językowych. Transformer wyeliminował potrzebę sekwencyjnego przetwarzania danych. To przełomowe podejście pozwoliło na jednoczesne przetwarzanie wszystkich elementów sekwencji, co znacząco zwiększyło wydajność i skalowalność modeli językowych.\cite{natural-lang-process-transf22}
+
+Mechanizm uwagi jest kluczowym elementem architektury Transformer. Zasadniczo pozwala on modelowi skupić się na różnych częściach wejściowej sekwencji w zależności od kontekstu. Transformer wykorzystuje tzw. mechanizm samouwagi (ang. \textit{self-attention}), który pozwala modelowi oceniać powiązania pomiędzy każdym słowem w sekwencji i innymi słowami, niezależnie od ich pozycji. Mechanizm ten oblicza tzw. wyniki uwagi (ang. \textit{attention scores}), które reprezentują stopień, w jakim jedno słowo wpływa na interpretację drugiego. Dzięki temu model jest w stanie lepiej rozumieć zależności i struktury składniowe w zdaniu.
+
+Transformer składa się z dwóch głównych bloków: enkodera i dekodera.
+\begin{itemize}
+  \item Enkoder przetwarza dane wejściowe, tworząc dla każdego słowa wektory reprezentujące ich znaczenie w kontekście całej sekwencji. Każdy enkoder składa się z kilku warstw, z których każda zawiera blok uwagi oraz blok sieci w pełni połączonej (ang. \textit{feed-forward neural network}).
+  \item Dekoder generuje wyjście (np. tłumaczenie zdania na inny język) na podstawie zakodowanych reprezentacji dostarczonych przez enkoder. Podobnie jak enkoder, dekoder składa się z kilku warstw uwagi i sieci neuronowych.
+\end{itemize}
+
+Transformery, w przeciwieństwie do sieci rekurencyjnych, nie mają wbudowanej sekwencyjności. Aby poradzić sobie z problemem pozycji słów, architektura ta wprowadza osadzenia pozycyjne, które dodawane są do wektorów wejściowych, aby model mógł rozróżniać kolejność słów. Dodatkowo w zadaniach generowania tekstu, takich jak tłumaczenie, stosuje się maskowanie, które uniemożliwia modelowi “podglądanie” przyszłych słów w generowanym zdaniu.
+
+\subsection{Tokenizacja}
+Tokenizacja to podstawowy proces, w którym duże modele językowe rozbijają surowy tekst na dyskretne jednostki - tokeny - które model może przetwarzać numerycznie. Tokeny mogą reprezentować całe słowa, części słów (podjednostki), znaki interpunkcyjne, a nawet pojedyncze litery czy spacje \cite{tokenization-lxt}. Na przykład proste zdanie "Mój ulubiony kolor to niebieski.", a następnie jego tłumaczenie "My favorite color is blue." może wygenerować około 23 tokenów, ale aż 65 znaków (łącznie ze spacjami i interpunkcją), jak pokazuje obrazek. To rozbieżne zestawienie podkreśla, że liczba tokenów nie równa się liczbie znaków, a tokenizacja działa na innym, bardziej abstrakcyjnym poziomie niż nasze ludzkie postrzeganie liter.
+
+Większość współczesnych modelów językowych korzysta z technik tokenizacji podjednostkowej, takich jak Byte-Pair Encoding (BPE) czy WordPiece \cite{winder-ai-token}. Często używane słowa, takie jak „My”, „favorite” czy „color”, mogą pozostać nienaruszone jako pojedyncze tokeny. Natomiast rzadsze słowa – nawet te powszechne w danym języku – są zwykle dzielone: przykładowo „niebieski” może zostać rozłożone na części takie jak „nie”, „bie”, „ski”. Podobnie token typu „GPT-4” jest terminem specjalistycznym, więc zostanie rozbity na mniejsze fragmenty: „G”, „PT”, „-”, „4”, każdy jako osobny token \cite{mediumUnderstandingTokens}. Liczby, znaki interpunkcyjne, diakrytyki – jak polskie „ó” – czy znaki specjalne również stają się tokenami, co dodatkowo zwiększa ich liczbę.
+
+Metody podjednostkowe oferują elastyczny kompromis: zachowują efektywność dla częstych słów, a jednocześnie potrafią obsługiwać rzadkie czy morfologicznie złożone formy. Jednak ich elastyczność ma cenę - rozdrobnione tokeny zwiększają liczbę tokenów, a tym samym koszt obliczeniowy \cite{microsoftUnderstandingTokens}. Co więcej, tokenizacja wykazuje nierównowagę językową: to samo zdanie po angielsku może wymagać mniej tokenów niż po hiszpańsku czy polsku. Przykładowo: hiszpańskie „El sol es brillante” wymaga 5 tokenów, podczas gdy angielskie „The sun is brilliant” tylko 4 – mimo że długość znaków jest podobna
+\cite{arxivLargeLanguage}. To pokazuje, że projekt tokenizatora wpływa na sprawiedliwość i koszty w kontekście wielojęzycznym \cite{arxivLanguageModel-unfairness}.
+
+Aby to zobrazować: przyjmuje się, że w języku angielskim średnio przypada ok. 0,75 słowa na token - czyli tekst o długości 100 słów to około ~133 tokeny - ale proporcja ta zmienia się w zależności od języka i systemu pisma. W testach granicznych LLM-y często mają trudności z rozumowaniem na poziomie liter, np. przy liczeniu liter w słowie „strawberry”, ponieważ model rozumuje na poziomie tokenów i nie zawsze dokładnie śledzi wewnętrzne znaki \cite{arxivLargeLanguage}.
+
+Na rysunku \ref{fig:sentence-divided-by-token} pokazano przykład ilustrujący tokenizację. Częste elementy jak „My” czy „favorite” zostaną przypisane do całych tokenów, podczas gdy „niebieski” może być rozbite na kilka podjednostek. Nietypowe tokeny, liczby, spacje, interpunkcja stają się osobnymi tokenami.
+
+\begin{figure}[!h]
+    \centering \includegraphics[width=1\linewidth]{img/tokeny.png}
+    \caption{Tokenizacja ciągu znaków}
+    \label{fig:sentence-divided-by-token}
+\end{figure}
+
+Modele językowe przekształcają tokeny w wektory liczb zmiennoprzecinkowych w przestrzeni wielowymiarowej. Proces ten nazywany jest osadzaniem wektorowym. Wyróżniamy dwa główne typy osadzeń. Osadzenia wejściowe (ang. \textit{input embeddings}) przekształcają tokeny w wektory o ustalonej wymiarowości, uczą się podczas treningu reprezentacji semantycznych, zawierają informacje o znaczeniu i kontekście słów. Osadzenia pozycyjne (ang. \textit{positional embeddings}) dodają informację o pozycji tokenu w sekwencji, mogą być uczone lub generowane według wzoru matematycznego, umożliwiając modelowi uwzględnienie kolejności słów.
+
+Tokeny i osadzenia pełnią kluczową rolę w działaniu modeli językowych, gdyż umożliwiają efektywne przetwarzanie tekstu przez redukcję słownika, zachowują informacje semantyczne i syntaktyczne, pozwalają na transfer wiedzy między zadaniami językowymi i stanowią podstawę dla mechanizmów uwagi w architekturze Transformer. Jakość tokenizacji i osadzeń ma bezpośredni wpływ na wydajność modelu w zadaniach NLP, wpływając zarówno na zrozumienie kontekstu, jak i generowanie tekstu.\cite{hands-on-llm24}
+
+\subsection{Ograniczenia modeli}
+Mimo wielu zalet LLM-y posiadają również istotne ograniczenia. Data graniczna wiedzy, często podawana wraz z nazwą modelu, oznacza, że model został nauczony wyłącznie na danych do określonej daty i nie posiada informacji o późniejszych wydarzeniach. Dodatkowo, modele te nie uczą się z prowadzonych rozmów, co uniemożliwia im doskonalenie się poprzez interakcję. W kwestii niezawodności poważnym problemem pozostaje zjawisko halucynacji – generowanie wiarygodnie brzmiących, lecz fałszywych informacji – co stanowi wyzwanie również w dziedzinie rozwoju oprogramowania.
+
+Kluczowym ograniczeniem dzisiejszych modeli są limity okna kontekstowego. Okno to określa maksymalną liczbę tokenów, które model może jednocześnie przetworzyć w ramach pojedynczego zapytania. Obejmuje ono zarówno dane wejściowe (\textit{prompt}), jak i generowaną odpowiedź. Słowa i ich fragmenty zamieniane są na tokeny, których liczba zależy od języka i struktury tekstu. Przekroczenie limitu powoduje obcięcie wcześniejszych części kontekstu lub uniemożliwia wygenerowanie dłuższej odpowiedzi. Modele z większymi limitami tokenów umożliwiają bardziej złożoną analizę i lepsze rozumienie kontekstu w rozbudowanych interakcjach, jednak wymagają też większej mocy obliczeniowej. Te ograniczenia bezpośrednio wpływają na zdolność przetwarzania długich danych wejściowych i wyjściowych, co stanowi główne wyzwanie dla współczesnych systemów opartych na modelach językowych.
+
+Optymalizacja okna kontekstowego jest niezbędna dla efektywnego wykorzystania zasobów i poprawy jakości generowanych odpowiedzi. Jedną z metod jest dynamiczne przycinanie kontekstu – usuwanie mniej istotnych fragmentów tekstu przy jednoczesnym zachowaniu spójności wypowiedzi. W procesie tym kluczowe jest zachowanie najważniejszych informacji poprzez identyfikację i priorytetyzację kluczowych treści, takich jak pytania użytkownika, definicje czy istotne fakty. Dodatkową techniką jest podsumowywanie konwersacji – tworzenie zwięzłych wersji wcześniejszych wypowiedzi, które oddają ich sens przy mniejszym zużyciu tokenów. Te metody pozwalają na bardziej efektywne działanie modeli językowych, zwiększając zarówno ich wydajność, jak i zdolność do utrzymywania spójnych oraz trafnych odpowiedzi w dłuższych interakcjach.
+
+\subsection{Agent AI}
+Agent LLM (często określany jako Agent AI) staje się coraz bardziej powszechnym terminem. Jest to rozszerzenie zwykłego modelu językowego, które rozwiązuje jego podstawowe ograniczenia. System Agenta LLM zawiera w sobie model językowy oraz dodatkowe komponenty, z których LLM może użyć do rozwiązywania złożonych problemów – takich jak rozumowanie, wykonywanie obliczeń, wyszukiwanie aktualnych informacji czy interpretacja kodu. Na przykład, gdy agent napotka zadanie matematyczne, może skorzystać z odpowiedniego narzędzia, takiego jak kalkulator (zobacz rysunek \ref{fig:agent}).
+
+Agenci wchodzą w interakcje ze swoim otoczeniem i zazwyczaj składają się z kilku kluczowych komponentów:
+\begin{itemize}
+\item Środowiska – świata, z którym agent wchodzi w interakcję
+\item Pamięci – miejsca przechowywania informacji z poprzednich interakcji
+\item Narzędzi – wykorzystywanych do interakcji z otoczeniem
+\item Rozumowania – reguł decydujących o przejściu od obserwacji do działań
+\end{itemize}
+
+\begin{figure}[!h]
+\centering \includegraphics[width=1\linewidth]{img/agent.png}
+\caption{Architektura agenta LLM}
+\label{fig:agent}
+\end{figure}
+
+Te ramy koncepcyjne stosuje się do różnych typów agentów wchodzących w interakcje z różnorodnymi środowiskami – od robotów współdziałających z otoczeniem fizycznym po agentów AI wchodzących w interakcje z oprogramowaniem.
+
+Agent może obserwować środowisko poprzez wprowadzanie tekstu (ponieważ LLM są zasadniczo modelami tekstowymi) i wykonywać określone czynności za pomocą narzędzi, takich jak przeszukiwanie sieci.
+
+Aby wybrać odpowiednie działania, agent LLM wykorzystuje kluczowy komponent: zdolność planowania. W tym celu LLM musi umieć rozumować za pomocą metod takich jak łańcuch myśli. Ten proces rozumowania można opisać w kilku krokach (zobacz rysunek \ref{fig:reasoning}). Wykorzystując takie podejście, agent LLM planuje niezbędne działania. Dzięki temu agent może zrozumieć sytuację (LLM), zaplanować kolejne kroki (rozumowanie), podjąć działania (narzędzia) oraz śledzić wykonane czynności (pamięć).
+
+\begin{figure}[!h]
+\centering \includegraphics[width=0.8\linewidth]{img/reasoning.png}
+\caption{Rozumowanie LLM - Łańcuch myśli}
+\label{fig:reasoning}
+\end{figure}
+
+Warto zauważyć, że samo rozumowanie w modelach językowych niekoniecznie umożliwia planowanie kroków do wykonania. Dostępne techniki albo pokazują zachowania rozumowe, albo umożliwiają interakcję ze środowiskiem za pomocą narzędzi. Na przykład Chain-of-Thought koncentruje się wyłącznie na rozumowaniu. Jedną z pierwszych technik łączących oba procesy jest ReAct (Reason and Act) \cite{react-reasoning-and-acting}. ReAct realizuje to poprzez staranną inżynierię podpowiedzi, która opisuje trzy kluczowe kroki:
+\begin{itemize}
+\item Myśl – krok rozumowania dotyczący bieżącej sytuacji
+\item Działanie – zestaw czynności do wykonania (np. użycie narzędzi)
+\item Obserwacja – krok rozumowania analizujący wynik działania
+\end{itemize}
+
+LLM wykorzystuje takie polecenie (które może funkcjonować jako instrukcja systemowa) do sterowania zachowaniem w cyklach myśli, działań i obserwacji. Poprzez iteracyjne myślenie i obserwowanie, LLM może planować działania, analizować ich wyniki i odpowiednio je dostosowywać. Ta struktura umożliwia modelom językowym wykazywanie bardziej autonomicznego zachowania w porównaniu z agentami o z góry zdefiniowanych, ustalonych krokach działania.
+
+Żaden system, nawet LLM z ReAct, nie wykona każdego zadania idealnie. Porażka jest naturalną częścią procesu uczenia. Tego elementu brakuje w podejściu \textit{ReAct} – i właśnie tu pojawia się Reflexion. Jest to technika wykorzystująca werbalne wzmocnienie, pomagająca agentom uczyć się na wcześniejszych błędach \cite{reflexion}. Metoda zakłada trzy role LLM:
+\begin{itemize}
+\item Aktor – wybiera i wykonuje działania na podstawie obserwacji stanu; może korzystać z metod takich jak Chain-of-Thought lub ReAct
+\item Ewaluator – ocenia wyniki wytworzone przez Aktora
+\item Autorefleksja – analizuje działania podjęte przez Aktora oraz wnioski wygenerowane przez Ewaluatora
+\end{itemize}
+
+W systemie dodawane są moduły pamięci służące do śledzenia działań (krótkoterminowych) i autorefleksji (długoterminowych), które pomagają agentowi uczyć się na błędach i identyfikować ulepszone sposoby działania. Podobną i elegancką techniką jest SELF-REFINE, gdzie cyklicznie powtarzane są procesy udoskonalania wyników i generowania informacji zwrotnych \cite{self-refine}.
+
+Co ciekawe, ten sam LLM odpowiada za generowanie wyników początkowych, udoskonalonych oraz informacji zwrotnych. Takie autorefleksyjne zachowanie, zarówno w przypadku Reflexion jak i SELF-REFINE, przypomina uczenie się przez wzmacnianie, gdzie nagroda przyznawana jest na podstawie jakości uzyskanego wyniku.
+
+Agenci AI opierają się na fundamencie LLM, dodając kluczowe możliwości, które przezwyciężają wiele ograniczeń standardowych modeli. Agenta można postrzegać jako wyrafinowany system, który używa LLM jako swojego „mózgu", ale wzmacnia go pamięcią, narzędziami, zdolnością podejmowania decyzji oraz możliwością działania w świecie rzeczywistym.
+
+Proces działania agentów ujawnia ich transformacyjny potencjał. Gdy agent otrzymuje dane wejściowe – tekst, dane lub informacje z czujników – najpierw przetwarza je za pomocą komponentu LLM. Jednak w przeciwieństwie do podstawowego modelu językowego, agent może następnie zdecydować o odpowiednich działaniach, korzystając z dostępnych narzędzi i możliwości. Może przeszukać bazę danych, wywołać interfejs API lub wykonać obliczenia. Agent przechowuje istotne informacje do wykorzystania w przyszłości i utrzymuje kontekst w trakcie wielu interakcji.
+
+Narzędzia pozwalają modelowi na interakcję ze środowiskiem zewnętrznym (np. bazami danych) lub korzystanie z aplikacji zewnętrznych (np. uruchamianie niestandardowego kodu). Mają one zazwyczaj dwa główne zastosowania: pobieranie aktualnych danych oraz wykonywanie działań, takich jak edytowanie czy uruchamianie kodu.
+
+Aby skutecznie wykorzystać narzędzie, LLM musi wygenerować tekst zgodny z API danego narzędzia. Najczęściej są to ciągi znaków formatowane do JSON, które można łatwo przekazać do interfejsu aplikacji zewnętrznej. Proces ten często określa się jako \textit{function calling}. Większość współczesnych modeli LLM potrafi korzystać z narzędzi, które można stosować w ustalonej kolejności lub pozwolić modelowi autonomicznie decydować, którego narzędzia użyć i kiedy. Agenci LLM są w istocie sekwencjami wywołań modelu językowego z autonomicznym wyborem działań i narzędzi – dane wyjściowe z etapów pośrednich są przekazywane z powrotem do LLM w celu kontynuacji przetwarzania.
+
+Narzędzia stanowią kluczowy element systemów agentowych, umożliwiając LLM interakcję ze światem i rozszerzenie ich możliwości. Jednak zarządzanie wieloma narzędziami i interfejsami API staje się problematyczne, ponieważ każde narzędzie wymaga:
+\begin{itemize}
+\item Ręcznego śledzenia i przekazywania do LLM
+\item Ręcznego opisywania (włącznie z oczekiwanym schematem JSON)
+\item Ręcznej aktualizacji przy każdej zmianie jego API
+\end{itemize}
+
+\subsection{Pamięć agenta AI}
+Modele językowe (LLM) nie posiadają pamięci w takim sensie, że nie zapisują ani nie wczytują danych między kolejnymi interakcjami. Oznacza to, że po zadaniu pytania i otrzymaniu odpowiedzi model nie identyfikuje ponownie tej wymiany w przyszłości, co uniemożliwia odniesienie się do wcześniejszej konwersacji.
+
+Pamięć krótkotrwała (robocza) pełni funkcję bufora bezpośredniego kontekstu — zwykle obejmuje ona ostatnie kroki lub zapytania, które mieszczą się w tzw. oknie kontekstowym modelu. Okno to (często co najmniej 8192 tokenów) pozwala na przechowywanie historii rozmowy jako dane wejściowe. Takie rozwiązanie efektywnie symuluje pamięć, dopóki historia mieści się w tym oknie; jednak w rzeczywistości model jedynie powtarza wcześniejsze fragmenty rozmowy podczas następnych zapytań użytkownika, a nie je zapamiętuje.
+
+Aby sobie radzić z większą ilością informacji lub rozbudowanymi historiami, stosuje się metody podsumowywania — LLM tworzy streszczenia wcześniejszych interakcji, by zachować esencję rozmowy, a jednocześnie ograniczyć liczbę tokenów w kontekście.
+
+Z kolei pamięć długoterminowa pozwala agentowi zapamiętywać znacznie więcej niż tylko ostatnie wiadomości — nawet dziesiątki lub setki kroków interakcji. Typową techniką realizacji jest zapisywanie wszystkich działań i konwersacji w zewnętrznej bazie danych wektorowych. Konwersacje są przekształcane w wektory, co umożliwia późniejsze odnalezienie najbardziej istotnych fragmentów przez porównanie zapytań z wektorami w bazie — to właśnie stanowi rdzeń podejścia Retrieval-Augmented Generation (RAG), w którym generacja odpowiedzi wspierana jest przez wyszukiwanie zewnętrzne \cite{medium2023rag, wikipedia2024rag}.
+
+Jednak warto rozróżnić RAG jako technikę wspomagania modelu o aktualną wiedzę (np. dokumenty, bazy, raporty) od rzeczywistej, „pamięci” zachowanej między sesjami. Pamięć długoterminowa obejmuje trwały zapis istotnych informacji, a RAG jedynie wykorzystuje zewnętrzne źródła w momencie generowania odpowiedzi \cite{labelstudio2024memory, letta2024memory}.
+
+Coraz częściej w systemach agentowych implementuje się hybrydowe podejście:
+\begin{itemize}
+\item pamięć krótkoterminowa (historyczne wymiany w bieżącej sesji),
+\item pamięć długoterminowa w postaci bazy wiedzy, zazwyczaj wektorowej, umożliwiającej późniejsze wyszukiwanie informacji,
+\item oraz mechanizmy, które decydują o tym, co zapisać i co pominąć — np. podczas „snu” agenta, tzw. sleeptime compute, kiedy systemy uczą się selektywnie zapamiętywać lub zapominać \cite{wired2024sleeptime}
+\end{itemize}
+
+\subsection{System wieloagentowy}
+Pojedynczy agent LLM napotyka istotne ograniczenia: nadmiar dostępnych narzędzi komplikuje proces wyboru, kontekst zadania staje się zbyt złożony, a wiele problemów wymaga specjalizacji. W odpowiedzi na te wyzwania zaczęto rozwijać systemy wieloagentowe (MAS, ang. Multi-Agent Systems), oparte na współdziałaniu wielu agentów LLM. Każdy z nich pełni wyspecjalizowaną rolę i dysponuje własnym zestawem narzędzi, co umożliwia lepsze dopasowanie kompetencji do zadań. W literaturze opisano liczne architektury oraz metody koordynacji takich agentów, a w niniejszej pracy zostaną przeprowadzone eksperymenty porównawcze, mające na celu ocenę ich efektywności w procesie rozwijania oprogramowania.
+
+Systemy wieloagentowe dla zadań inżynierskich opierają się na podziale pracy pomiędzy specjalistyczne role (np. Inżynier, Krytyk/Reviewer, Planista, Tester), które wspólnie dążą do realizacji jednego celu. Ramy programistyczne, takie jak AutoGen, znacząco upraszczają tworzenie tego typu układów — w tym scenariuszy z udziałem człowieka „w pętli” (human-in-the-loop). Najnowsze narzędzia, w tym rozszerzone wersje AutoGen, ułatwiają prototypowanie i debugowanie przepływów pracy \cite{autogen2023, autogenmsr2024}. Z kolei w literaturze systematyzuje się komponenty MAS (profil/rola, percepcja, samodziałanie, interakcje, ewolucja), podkreślając ich potencjał w zadaniach technicznych, takich jak implementacja czy przegląd kodu \cite{mas_survey_2024}.
+
+W praktyce zespół agentów w kontekście rozwoju oprogramowania może obejmować:
+\begin{itemize}
+\item Planowanie i dekompozycję – Planista tworzy plan działań lub propozycje PR-ów,
+\item Implementację – Inżynier modyfikuje kod, korzystając z narzędzi takich jak edytor, system kontroli wersji czy testy jednostkowe,
+\item Weryfikację i QA – Tester uruchamia zestawy testów, generuje nowe przypadki testowe oraz monitoruje regresje,
+\item Code Review – Krytyk analizuje różnice w kodzie, identyfikuje antywzorce i dba o zgodność ze standardem,
+\item Koordynację i refleksję – Koordynator ocenia postęp, restartuje pętle oraz wybiera kolejne kroki.
+\end{itemize}
+
+Badania nad automatyczną ewaluacją i mechanizmami self-refine wskazują, że stosowanie wyspecjalizowanych „oceniaczy” (dodatkowych modeli monitorujących jakość działań) znacząco poprawia skuteczność agentów w zadaniach wymagających interakcji z narzędziami \cite{autoeval2024}. Jednocześnie praktycy zwracają uwagę na istotne wyzwania dotyczące odpowiedzialności, kosztów i bezpieczeństwa w systemach autonomicznych i wieloagentowych. Wzmacnia to argument za utrzymaniem człowieka w pętli oraz wprowadzaniem mechanizmów audytu przez człowieka \cite{wired_agents_liability_2025}.

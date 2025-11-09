@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App Test Suite</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .test-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .test-nav {
+            background: #34495e;
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .test-nav button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-nav button:hover {
+            background: #2980b9;
+        }
+        .test-nav button.active {
+            background: #e74c3c;
+        }
+        .test-results {
+            padding: 20px;
+        }
+        .test-suite {
+            margin-bottom: 30px;
+        }
+        .test-suite h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        .test-case {
+            background: #f8f9fa;
+            margin: 10px 0;
+            padding: 15px;
+            border-left: 4px solid #95a5a6;
+            border-radius: 4px;
+        }
+        .test-case.pass {
+            border-left-color: #27ae60;
+            background: #d5fce8;
+        }
+        .test-case.fail {
+            border-left-color: #e74c3c;
+            background: #fce8e6;
+        }
+        .test-case.pending {
+            border-left-color: #f39c12;
+            background: #fef9e7;
+        }
+        .test-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .test-status {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        .test-error {
+            color: #e74c3c;
+            font-family: monospace;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .test-summary {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .test-summary h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .stat {
+            text-align: center;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .stat.passed { background: #d5fce8; color: #27ae60; }
+        .stat.failed { background: #fce8e6; color: #e74c3c; }
+        .stat.pending { background: #fef9e7; color: #f39c12; }
+        .stat.total { background: #dae8fc; color: #2980b9; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>Local MVP Notes App - Test Suite</h1>
+            <p>Comprehensive testing and validation framework</p>
+        </div>
+
+        <div class="test-nav">
+            <button onclick="runAllTests()" id="run-all-btn">Run All Tests</button>
+            <button onclick="runUnitTests()">Unit Tests</button>
+            <button onclick="runIntegrationTests()">Integration Tests</button>
+            <button onclick="runUITests()">UI Tests</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div class="test-results" id="test-results">
+            <div class="test-summary" id="test-summary" style="display: none;">
+                <h4>Test Summary</h4>
+                <div class="stats">
+                    <div class="stat total">
+                        <strong id="total-tests">0</strong>
+                        <div>Total</div>
+                    </div>
+                    <div class="stat passed">
+                        <strong id="passed-tests">0</strong>
+                        <div>Passed</div>
+                    </div>
+                    <div class="stat failed">
+                        <strong id="failed-tests">0</strong>
+                        <div>Failed</div>
+                    </div>
+                    <div class="stat pending">
+                        <strong id="pending-tests">0</strong>
+                        <div>Pending</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="test-output">
+                <p>Click "Run All Tests" to begin comprehensive testing of the Notes App.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include the app files -->
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/components/noteEditor.js"></script>
+    <script src="../js/components/notesList.js"></script>
+
+    <!-- Test framework -->
+    <script src="test-framework.js"></script>
+
+    <!-- Test suites -->
+    <script src="unit/storage-tests.js"></script>
+    <script src="unit/utils-tests.js"></script>
+    <script src="integration/notes-crud-tests.js"></script>
+    <script src="integration/ui-integration-tests.js"></script>
+</body>
+</html>

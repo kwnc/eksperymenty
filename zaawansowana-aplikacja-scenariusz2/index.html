@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteNest - Local Note Taking</title>
+
+    <!-- Quill.js Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Tesseract.js for OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+
+    <!-- Prism.js for code syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css" rel="stylesheet" media="(prefers-color-scheme: dark)">
+
+    <!-- Mermaid for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+    <!-- Application Styles -->
+    <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/themes.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Application will be rendered here -->
+        <div id="loading">Loading NoteNest...</div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <!-- Core JavaScript modules -->
+    <script src="src/js/core/database.js"></script>
+    <script src="src/js/core/auth.js"></script>
+    <script src="src/js/core/storage.js"></script>
+    <script src="src/js/core/theme.js"></script>
+    <script src="src/js/features/notes.js"></script>
+    <script src="src/js/features/notebooks.js"></script>
+    <script src="src/js/features/search.js"></script>
+    <script src="src/js/features/export.js"></script>
+    <script src="src/js/features/import.js"></script>
+    <script src="src/js/features/ocr.js"></script>
+    <script src="src/js/features/ai.js"></script>
+    <script src="src/js/features/views.js"></script>
+    <script src="src/js/features/code-highlight.js"></script>
+    <script src="src/js/ui/editor.js"></script>
+    <script src="src/js/ui/components.js"></script>
+    <script src="src/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteNest - Quick Note Taking</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NoteNest</h1>
+            <p>Your quick, distraction-free note taking space</p>
+        </header>
+
+        <main>
+            <section class="note-form">
+                <div class="form-group">
+                    <input type="text" id="noteTitle" placeholder="Note title..." class="title-input">
+                </div>
+                <div class="form-group">
+                    <textarea id="noteContent" placeholder="Start typing your note..." class="content-input"></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="noteTags" placeholder="Add tags (separated by commas)..." class="tags-input">
+                </div>
+                <div class="form-actions">
+                    <button id="saveNote" class="btn-primary">Save Note</button>
+                    <button id="clearNote" class="btn-secondary">Clear</button>
+                </div>
+            </section>
+
+            <section class="notes-filter">
+                <div class="filter-group">
+                    <input type="text" id="tagFilter" placeholder="Filter by tag..." class="filter-input">
+                    <button id="clearFilter" class="btn-filter">Clear Filter</button>
+                </div>
+                <div id="tagsList" class="tags-list"></div>
+            </section>
+
+            <section id="notesList" class="notes-list">
+                <div class="empty-state">
+                    <p>No notes yet. Create your first note above!</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

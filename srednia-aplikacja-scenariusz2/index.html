@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteNest - Simple Note Taking</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>NoteNest</h1>
+            <p>Your distraction-free note taking space</p>
+        </header>
+
+        <main>
+            <section id="note-editor">
+                <h2>Create New Note</h2>
+                <form id="note-form">
+                    <input type="text" id="note-title" placeholder="Note title..." required>
+                    <textarea id="note-content" placeholder="Write your note here..." required></textarea>
+                    <input type="text" id="note-tags" placeholder="Tags (comma-separated)">
+                    <button type="submit" id="save-note">Save Note</button>
+                </form>
+            </section>
+
+            <section id="note-list">
+                <h2>Your Notes</h2>
+                <div id="notes-container">
+                    <p id="no-notes-message">No notes yet. Create your first note above!</p>
+                </div>
+            </section>
+        </main>
+
+        <aside id="sidebar">
+            <section id="tag-manager">
+                <h3>Filter by Tags</h3>
+                <div id="tag-list">
+                    <div class="tag-filter active" data-tag="all">
+                        <span>All Notes</span>
+                        <span class="tag-count" id="all-count">0</span>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <!-- Toast notifications container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/notes.js"></script>
+    <script src="scripts/tags.js"></script>
+    <script src="scripts/app.js"></script>
+</body>
+</html>

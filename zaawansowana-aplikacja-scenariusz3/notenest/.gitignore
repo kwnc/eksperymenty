@@ -1,0 +1,23 @@
+# Development
+.DS_Store
+node_modules/
+npm-debug.log*
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Build
+dist/
+build/
+
+# Editor
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp

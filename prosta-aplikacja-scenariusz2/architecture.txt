@@ -1,0 +1,36 @@
+Architecture Overview
+
+  - React + TypeScript for the frontend framework
+  - Zustand for lightweight state management
+  - IndexedDB with Dexie for local data storage
+  - Vite for fast development and optimized builds
+  - React Router for navigation
+
+  Project Structure
+
+  src/
+  ├── components/     # Reusable UI components
+  ├── pages/         # Route-based page components
+  ├── stores/        # Zustand state stores
+  ├── db/           # Dexie database schema
+  ├── hooks/        # Custom React hooks
+  ├── utils/        # Helper functions
+  └── types/        # TypeScript definitions
+
+  Core Features for MVP
+
+  1. Note CRUD operations
+  2. Folder organization
+  3. Search functionality
+  4. Rich text editing
+  5. Data export/import
+
+  Setup Commands
+
+  npm create vite@latest note-app -- --template react-ts
+  cd note-app
+  npm install zustand dexie react-router-dom @headlessui/react
+  npm install -D tailwindcss @types/node vitest
+
+  The architecture emphasizes offline-first design, browser compatibility, and scalable component organization. Would you like me to help implement any specific part of
+  this architecture?

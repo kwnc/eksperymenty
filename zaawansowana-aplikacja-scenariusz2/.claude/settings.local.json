@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(open index.html)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
