@@ -1,9 +1,9 @@
 \newpage
 \section{Eksperymenty}
-Dla każdej z wcześniej wspomnianych konfiguracji systemu agentowego wykonano eksperymenty generowania przykładowej aplikacji notatnik. W ramach danego eksperymentu przyjęto jedno z wymagań dla aplikacji biznesowej i przeprowadzono szereg testów dla systemu agentowego o różnych konfiguracjach. Każda konfiguracja systemu różni się między innymi liczbą, rolami agentów, poziomem autonomii agentów oraz strategią komunikacji między agentami. Celem eksperymentów było zbadanie, jak zmiany tych parametrów wpływają na rezultat końcowy generowanej aplikacji webowej dla danych wejściowych. Dane wejściowe w tym przypadku przyjmują formę wymaganej specyfikacji dla  aplikacji notatnik. Z każdym eksperymentem poziom złożoności wymaganej aplikacji biznesowej rośnie:
+Dla każdej z wcześniej wspomnianych konfiguracji systemu agentowego przeprowadzono eksperymenty generowania przykładowej aplikacji notatnik. W ramach danego eksperymentu przyjęto jedno z wymagań dla aplikacji biznesowej i przeprowadzono szereg testów systemu agentowego o różnych konfiguracjach. Każda konfiguracja systemu różni się między innymi liczbą, rolami agentów, poziomem autonomii agentów oraz strategią komunikacji między agentami. Celem eksperymentów było zbadanie, jak zmiany tych parametrów wpływają na ostateczny rezultat generowanej aplikacji webowej dla danych wejściowych. Dane wejściowe w tym przypadku przyjmują formę wymaganej specyfikacji dla  aplikacji notatnik. Z każdym eksperymentem poziom złożoności wymaganej aplikacji biznesowej rośnie:
 \begin{itemize}
   \item pierwszy eksperyment to proste zapytanie do systemu agentowego o wygenerowanie aplikacji notatnika
-  \item drugi eksperyment to zapytanie systemu agentowego o wygenerowanie aplikacji notatnika z załączoną specyfikacją w formie pliku, która zawiera wymagania kilku funkcjonalności dla aplikacji notatnika
+  \item drugi eksperyment to zapytanie systemu agentowego o wygenerowanie aplikacji notatnika z załączoną specyfikacją w formie pliku, który zawiera wymagania kilku funkcjonalności dla aplikacji notatnika
   \item trzeci to z kolei zapytanie systemu agentowego o wygenerowanie aplikacji notatnika z załączoną zaawansowaną specyfikacją notatnika w formie pliku, która zawiera bardzo złożone i niestandardowe funkcjonalności
 \end{itemize}
 
@@ -15,17 +15,17 @@ Każde z testów, którego wykonanie przez system agentowy wygenerowało kod ora
     \item brak błędów - kod powinien być wolny od błędów
 \end{itemize}
 
-Eksperymenty przeprowadzono na przestrzeni sierpnia i września 2025 roku, wykorzystując język angielski, który jest powszechnie używany w środowisku programistycznym. Wykorzystano Claude Opus 4. Taki wybór ułatwił jednolitą analizę i porównanie wyników, zapewniając spójność i wiarygodność podczas testów, a także ułatwi ewentualne dalsze porównania z innymi badaniami przeprowadzanymi w międzynarodowym środowisku programistycznym.
+Eksperymenty przeprowadzono w październiku 2025 roku, wykorzystując język angielski, który jest powszechnie używany w środowisku programistycznym. Wykorzystano Claude Opus 4. Taki wybór ułatwił jednolitą analizę i porównanie wyników, zapewniając spójność i wiarygodność podczas testów, a także ułatwi ewentualne dalsze porównania z innymi badaniami przeprowadzanymi w międzynarodowym środowisku programistycznym.
 
 \subsection{Eksperyment z podstawową aplikacją}
-Pierwszy eksperyment polegał na ocenie możliwości systemu agentowego w najprostszej konfiguracji zadaniowej. System otrzymał zapytanie w języku naturalnym (angielskim) o wygenerowanie aplikacji notatnika bez dodatkowej dokumentacji czy szczegółowej specyfikacji. Celem eksperymentu było sprawdzenie, jak system radzi sobie z interpretacją ogólnego polecenia i jakie są możliwości generacyjne w domyślnych warunkach.
+Pierwszy eksperyment polegał na ocenie możliwości systemu agentowego w najprostszej konfiguracji zadaniowej. System otrzymał zapytanie w języku naturalnym (angielskim) o wygenerowanie aplikacji notatnika bez dodatkowej dokumentacji ani szczegółowej specyfikacji. Celem eksperymentu było sprawdzenie, jak system radzi sobie z interpretacją ogólnego polecenia oraz jakie są możliwości generacyjne w domyślnych warunkach.
 
 W pierwszym scenariuszu wysłano ogólne polecenie utworzenia notatnika systemu opartego o jednego agenta. W drugim scenariuszu wysłano polecenie systemowi opartemu o dwóch agentów, natomiast w trzecim scenariuszu wysłano polecenie systemowi opartemu o trzech agentów.
 
 Podczas tworzenia prostej, generycznej aplikacji notatnika systemy mogą napotkać specyficzne wyzwania. Zastosowanie podejścia wieloagentowego w takim przypadku może okazać się przerostem formy nad treścią, ponieważ dodatkowa złożoność i generowanie niepotrzebnych rozwiązań nie są uzasadnione przy tak niewielkim projekcie. W przeciwieństwie do tego, system oparty na pojedynczym agencie powinien bez problemu sprostać wymaganiom prostego notatnika.
 
 \subsubsection*{Scenariusz 1 - podstawowy agent}
-System jednego agenta był w stanie wygenerować kod aplikacji notatnika. Czas generowania aplikacji wyniósł 5 minut. Aplikacja włącza się poprawnie. Dodawanie nowych notatek, jak i usuwanie działa bez błędów. Aplikacja posiada również funkcję edytowania notatek, która również działa. Ostatnią z funkcji aplikacji jest wyszukiwanie notatek, które również działa. Interfejs użytkownika jest prosty i intuicyjny. Ogólna ocena eksperymentu pokazała, że system agentowy w najprostszej konfiguracji może być przydatny do szybkiego generowania prototypów bardzo prostych aplikacji.
+System jednego agenta był w stanie wygenerować kod aplikacji notatnika. Czas generowania aplikacji wyniósł 5 minut. Aplikacja włącza się poprawnie. Dodawanie nowych notatek, jak i usuwanie, działa bez błędów. Aplikacja posiada również funkcję edytowania notatek, która także działa. Ostatnią funkcją aplikacji jest wyszukiwanie notatek, które również działa. Interfejs użytkownika jest prosty i intuicyjny. Ogólna ocena eksperymentu pokazała, że system agentowy w najprostszej konfiguracji może być przydatny do szybkiego generowania prototypów bardzo prostych aplikacji.
 
 \subsubsection*{Scenariusz 2 - przepływ danych w systemie architekt - programista}
 Podczas tego scenariusza system wygenerował bardziej złożoną aplikację. Czas generowania aplikacji wyniósł 10 minut. Poza podstawowymi funkcjami, które wymieniono w poprzednim scenariuszu, znalazły się takie funkcje jak: organizacja notatek w folderach, oznaczanie notatek tagami, eksportowanie i importowanie notatek. W odróżnieniu od poprzedniego scenariusza, gdzie wygenerowano pojedynczy skrypt, w tym scenariuszu kod jest kompletnym projektem opartym o framework React i spełnia standardy jakości. Należy zauważyć, że aplikacja estetycznie bardzo odbiega jakością od poprzedniego scenariusza.
@@ -134,7 +134,7 @@ Wyniki zestawione w tabeli \ref{table:eksperyment-z-zaawansowana-specyfikacja-ap
     \hline
     \textbf{brak błędów} & 3 & 3 & 5 \\
     \hline
-    \textbf{czas generowania} & 30 min & 1 h & 2 h \\
+    \textbf{czas generowania} & 30 min & 60 m & 120 m \\
     \hline
     \end{tabular}
     \caption{Wyniki eksperymentu aplikacji ze złożoną specyfikacją}
