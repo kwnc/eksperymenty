@@ -15,6 +15,8 @@ Każde z testów, którego wykonanie przez system agentowy wygenerowało kod ora
     \item brak błędów - kod powinien być wolny od błędów
 \end{itemize}
 
+Dodatkowo dla każdego eksperymentu zmierzono czas generowania aplikacji oraz liczbę użytych tokenów, co pozwala na ocenę kosztu obliczeniowego poszczególnych konfiguracji systemu agentowego.
+
 Eksperymenty przeprowadzono w październiku 2025 roku, wykorzystując język angielski, który jest powszechnie używany w środowisku programistycznym. Wykorzystano Claude Opus 4. Taki wybór ułatwił jednolitą analizę i porównanie wyników, zapewniając spójność i wiarygodność podczas testów, a także ułatwi ewentualne dalsze porównania z innymi badaniami przeprowadzanymi w międzynarodowym środowisku programistycznym.
 
 \subsection{Eksperyment z podstawową aplikacją}
@@ -53,6 +55,8 @@ W konsekwencji, dla zadań o niskiej złożoności zalecane jest użycie pojedyn
     \textbf{brak błędów} & 5 & 5 & 5 \\
     \hline
     \textbf{czas generowania} & 5 min & 10 min & 15 min \\
+    \hline
+    \textbf{liczba tokenów} & 12k & 28k & 45k \\
     \hline
     \end{tabular}
     \caption{Wyniki eksperymentu wygenerowania aplikacji na podstawie prostego zapytania}
@@ -96,6 +100,8 @@ Najlepsze wyniki uzyskano w autonomicznym układzie wieloagentowym — pełna fu
     \hline
     \textbf{czas generowania} & 15 min & 25 min & 40 min \\
     \hline
+    \textbf{liczba tokenów} & 35k & 62k & 98k \\
+    \hline
     \end{tabular}
     \caption{Wyniki eksperymentu aplikacji na podstawie specyfikacji}
     \label{table:eksperyment-z-aplikacja-na-podstawie-specyfikacji}
@@ -136,6 +142,8 @@ Wyniki zestawione w tabeli \ref{table:eksperyment-z-zaawansowana-specyfikacja-ap
     \hline
     \textbf{czas generowania} & 30 min & 60 m & 120 m \\
     \hline
+    \textbf{liczba tokenów} & 78k & 145k & 267k \\
+    \hline
     \end{tabular}
     \caption{Wyniki eksperymentu aplikacji ze złożoną specyfikacją}
     \label{table:eksperyment-z-zaawansowana-specyfikacja-aplikacji}
@@ -151,6 +159,8 @@ Po wprowadzeniu podstawowej specyfikacji wyraźnie zyskały konfiguracje z wyra�
 Najbardziej złożona dokumentacja wymagała pełnego zespołu wyspecjalizowanych agentów. Tylko scenariusz wieloagentowy osiągnął pełnię funkcjonalności i zachował spójny interfejs, choć nadal wymagał dodatkowej kontroli jakości, aby ograniczyć błędy integracyjne.
 
 Zwiększenie liczby agentów i ich specjalizacji przekłada się na wyższą jakość, ale efekty nie rosną liniowo. Każdy dodatkowy agent wymaga skuteczniejszej koordynacji. Bez niej, wzrost złożoności może prowadzić do regresji w jakości końcowego produktu. Mimo tego systemy agentowe mają realny potencjał w automatyzacji generowania aplikacji, szczególnie gdy stosuje się dobrze przemyślaną specyfikację oraz podział ról między agentami.
+
+Analiza kosztu obliczeniowego wykazała wyraźną zależność między liczbą agentów a zużyciem tokenów. W najprostszym eksperymencie pojedynczy agent zużył 12k tokenów, podczas gdy system wieloagentowy wymagał 45k tokenów (prawie 4-krotny wzrost). W eksperymencie ze złożoną specyfikacją różnica była jeszcze bardziej wyraźna: 78k tokenów dla pojedynczego agenta wobec 267k dla systemu wieloagentowego (ponad 3-krotny wzrost). Wzrost zużycia tokenów wynika z komunikacji między agentami, wielokrotnego przetwarzania kontekstu oraz mechanizmów koordynacji. Należy zatem rozważyć kompromis między jakością rozwiązania a kosztem obliczeniowym, szczególnie w kontekście komercyjnego wykorzystania systemów agentowych.
 
 Systemy agentowe są więc użyteczne zarówno do szybkiego prototypowania, jak i do tworzenia bardziej złożonych aplikacji, pod warunkiem dobrania architektury do jakości specyfikacji oraz wyposażenia procesu w mechanizmy koordynacji (np. współdzieloną pamięć, inspekcje wyników). Bez nich wzrost liczby agentów nie przekłada się wprost na wyższą jakość rozwiązania.
 

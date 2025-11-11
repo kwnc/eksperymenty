@@ -59,6 +59,8 @@ Rysunek \ref{fig:screenshot-work-order} prezentuje formularz tworzenia nowego zl
 \subsection{Ocena efektywności procesu}
 Proces implementacji przeprowadzono w ramach sesji z systemem wieloagentowym, która trwała około dwóch godzin. Całość prac obejmowała fazę planowania (agent Architekt), implementację (agent Builder) oraz walidację (agent Validator). System wygenerował kompletną aplikację MVP spełniającą część wymagań funkcjonalnych określonych w specyfikacji. Dzięki architekturze local-first, aplikacja mogła być uruchomiona bez dodatkowych konfiguracji żadnych zewnętrznych usług czy kluczy API, a wszystkie dane są przechowywane lokalnie w przeglądarce użytkownika.
 
+W trakcie całego procesu wytwórczego system zużył łącznie 312k tokenów, co stanowi znaczący koszt obliczeniowy. Dla porównania, w eksperymentach z aplikacją notatnika system wieloagentowy przy zaawansowanej specyfikacji zużył 267k tokenów. Wyższe zużycie w przypadku AutoServe wynika z większej złożoności domeny biznesowej (zarządzanie serwisem samochodowym vs. notatnik), bardziej rozbudowanej specyfikacji oraz dłuższego procesu implementacji obejmującego pięć sprintów. Koszt ten należy uwzględnić przy ocenie opłacalności wykorzystania systemów wieloagentowych w komercyjnych projektach.
+
 Projekt finalnie liczy 39 plików źródłowych w języku TypeScript oraz 7 plików konfiguracyjnych. Struktura katalogów obejmuje: 14 komponentów UI w katalogu \texttt{src/components}, 7 stron aplikacji w katalogu \texttt{src/pages}, warstwę bazodanową Dexie.js w \texttt{src/db} oraz funkcje pomocnicze w \texttt{src/lib}. Aplikacja wykorzystuje 29 zależności produkcyjnych (m.in. React, Zustand, Dexie, Zod, date-fns, lucide-react) oraz 21 zależności deweloperskich (m.in. Vite, TypeScript, ESLint, Vitest, Testing Library).
 
 \begin{figure}[!h]
@@ -89,6 +91,8 @@ System wieloagentowy wykazał się szczególną skutecznością w wyborze odpowi
     \textbf{brak błędów} & 4 \\
     \hline
     \textbf{czas generowania} & 120 m \\
+    \hline
+    \textbf{liczba tokenów} & 312k \\
     \hline
     \end{tabular}
     \caption{Wyniki wygenerowanej aplikacji biznesowej}
