@@ -1,240 +1,336 @@
-class TestFramework {
-    constructor() {
-        this.tests = [];
-        this.currentSuite = '';
-        this.results = {
-            total: 0,
-            passed: 0,
-            failed: 0,
-            pending: 0
-        };
+/**
+ * Minimal Test Framework
+ * Lightweight testing framework for the note-taking app
+ *
+ * @module test-framework
+ */
+
+// Test results storage
+const testResults = {
+  passed: 0,
+  failed: 0,
+  skipped: 0,
+  tests: [],
+  suites: []
+};
+
+// Current test suite context
+let currentSuite = null;
+let setupFunc = null;
+let teardownFunc = null;
+
+/**
+ * Test suite definition
+ * @param {string} suiteName - Name of the test suite
+ * @param {Function} suiteFunc - Function containing tests
+ */
+export function describe(suiteName, suiteFunc) {
+  const suite = {
+    name: suiteName,
+    tests: [],
+    passed: 0,
+    failed: 0
+  };
+
+  currentSuite = suite;
+  setupFunc = null;
+  teardownFunc = null;
+
+  try {
+    suiteFunc();
+  } catch (error) {
+    console.error(`Error in suite "${suiteName}":`, error);
+  }
+
+  testResults.suites.push(suite);
+  currentSuite = null;
+}
+
+/**
+ * Individual test definition
+ * @param {string} testName - Name of the test
+ * @param {Function} testFunc - Test function
+ */
+export function it(testName, testFunc) {
+  if (!currentSuite) {
+    console.error('Test must be inside a describe block');
+    return;
+  }
+
+  const test = {
+    name: testName,
+    passed: false,
+    error: null,
+    duration: 0
+  };
+
+  try {
+    // Run setup if defined
+    if (setupFunc) {
+      setupFunc();
     }
 
-    describe(suiteName, testFn) {
-        this.currentSuite = suiteName;
-        console.log(`\n--- Running test suite: ${suiteName} ---`);
-        testFn();
+    const startTime = performance.now();
+    testFunc();
+    test.duration = performance.now() - startTime;
+
+    test.passed = true;
+    currentSuite.passed++;
+    testResults.passed++;
+  } catch (error) {
+    test.passed = false;
+    test.error = error.message;
+    currentSuite.failed++;
+    testResults.failed++;
+  } finally {
+    // Run teardown if defined
+    if (teardownFunc) {
+      try {
+        teardownFunc();
+      } catch (error) {
+        console.error('Teardown error:', error);
+      }
     }
+  }
 
-    it(testName, testFn) {
-        const test = {
-            suite: this.currentSuite,
-            name: testName,
-            fn: testFn,
-            status: 'pending',
-            error: null,
-            startTime: null,
-            endTime: null
-        };
-        this.tests.push(test);
-    }
+  currentSuite.tests.push(test);
+  testResults.tests.push(test);
+}
 
-    async runTest(test) {
-        test.status = 'running';
-        test.startTime = performance.now();
+/**
+ * Assertion: expect value to equal expected
+ * @param {*} actual - Actual value
+ * @returns {Object} Assertion methods
+ */
+export function expect(actual) {
+  return {
+    toBe(expected) {
+      if (actual !== expected) {
+        throw new Error(`Expected ${JSON.stringify(actual)} to be ${JSON.stringify(expected)}`);
+      }
+    },
 
-        try {
-            const result = test.fn();
-            if (result instanceof Promise) {
-                await result;
-            }
-            test.status = 'passed';
-            this.results.passed++;
-        } catch (error) {
-            test.status = 'failed';
-            test.error = error;
-            this.results.failed++;
+    toEqual(expected) {
+      const actualStr = JSON.stringify(actual);
+      const expectedStr = JSON.stringify(expected);
+      if (actualStr !== expectedStr) {
+        throw new Error(`Expected ${actualStr} to equal ${expectedStr}`);
+      }
+    },
+
+    toBeTruthy() {
+      if (!actual) {
+        throw new Error(`Expected ${JSON.stringify(actual)} to be truthy`);
+      }
+    },
+
+    toBeFalsy() {
+      if (actual) {
+        throw new Error(`Expected ${JSON.stringify(actual)} to be falsy`);
+      }
+    },
+
+    toContain(item) {
+      if (Array.isArray(actual)) {
+        if (!actual.includes(item)) {
+          throw new Error(`Expected array to contain ${JSON.stringify(item)}`);
         }
-
-        test.endTime = performance.now();
-        this.results.total++;
-    }
-
-    async runAllTests() {
-        this.results = { total: 0, passed: 0, failed: 0, pending: 0 };
-
-        for (const test of this.tests) {
-            await this.runTest(test);
-            this.updateTestDisplay(test);
+      } else if (typeof actual === 'string') {
+        if (!actual.includes(item)) {
+          throw new Error(`Expected string to contain "${item}"`);
         }
+      } else {
+        throw new Error('toContain can only be used with arrays or strings');
+      }
+    },
 
-        this.updateSummary();
-        console.log('\n--- Test Results ---');
-        console.log(`Total: ${this.results.total}, Passed: ${this.results.passed}, Failed: ${this.results.failed}`);
+    toThrow() {
+      if (typeof actual !== 'function') {
+        throw new Error('toThrow requires a function');
+      }
+
+      let didThrow = false;
+      try {
+        actual();
+      } catch (error) {
+        didThrow = true;
+      }
+
+      if (!didThrow) {
+        throw new Error('Expected function to throw an error');
+      }
+    },
+
+    toBeNull() {
+      if (actual !== null) {
+        throw new Error(`Expected ${JSON.stringify(actual)} to be null`);
+      }
+    },
+
+    toBeUndefined() {
+      if (actual !== undefined) {
+        throw new Error(`Expected value to be undefined`);
+      }
+    },
+
+    toBeGreaterThan(expected) {
+      if (actual <= expected) {
+        throw new Error(`Expected ${actual} to be greater than ${expected}`);
+      }
+    },
+
+    toBeLessThan(expected) {
+      if (actual >= expected) {
+        throw new Error(`Expected ${actual} to be less than ${expected}`);
+      }
+    },
+
+    toHaveLength(expected) {
+      if (!actual || typeof actual.length !== 'number') {
+        throw new Error('Expected value to have a length property');
+      }
+      if (actual.length !== expected) {
+        throw new Error(`Expected length ${actual.length} to be ${expected}`);
+      }
     }
+  };
+}
 
-    updateTestDisplay(test) {
-        const outputDiv = document.getElementById('test-output');
-        const suiteDiv = this.getOrCreateSuiteDiv(test.suite);
+/**
+ * Setup function to run before each test
+ * @param {Function} func - Setup function
+ */
+export function beforeEach(func) {
+  setupFunc = func;
+}
 
-        const testDiv = document.createElement('div');
-        testDiv.className = `test-case ${test.status}`;
-        testDiv.innerHTML = `
-            <div class="test-name">${test.name}</div>
-            <div class="test-status">${test.status.toUpperCase()} ${test.endTime ? `(${(test.endTime - test.startTime).toFixed(2)}ms)` : ''}</div>
-            ${test.error ? `<div class="test-error">${test.error.message}</div>` : ''}
-        `;
+/**
+ * Teardown function to run after each test
+ * @param {Function} func - Teardown function
+ */
+export function afterEach(func) {
+  teardownFunc = func;
+}
 
-        suiteDiv.appendChild(testDiv);
+/**
+ * Run all tests and display results
+ */
+export function runTests() {
+  // Tests are run as they are defined
+  displayResults();
+}
+
+/**
+ * Display test results in the page
+ */
+function displayResults() {
+  const resultsContainer = document.getElementById('testResults');
+  if (!resultsContainer) {
+    console.error('Test results container not found');
+    return;
+  }
+
+  resultsContainer.innerHTML = '';
+
+  // Summary
+  const summary = document.createElement('div');
+  summary.className = 'summary';
+  const totalTests = testResults.passed + testResults.failed;
+  const passRate = totalTests > 0 ? ((testResults.passed / totalTests) * 100).toFixed(1) : 0;
+
+  summary.innerHTML = `
+    <h2>Test Results Summary</h2>
+    <p><strong>Total Tests:</strong> ${totalTests}</p>
+    <p><strong>Passed:</strong> <span style="color: #28A745">${testResults.passed}</span></p>
+    <p><strong>Failed:</strong> <span style="color: #DC3545">${testResults.failed}</span></p>
+    <p><strong>Pass Rate:</strong> ${passRate}%</p>
+  `;
+  resultsContainer.appendChild(summary);
+
+  // Test suites
+  testResults.suites.forEach(suite => {
+    const suiteDiv = document.createElement('div');
+    suiteDiv.className = 'test-suite';
+
+    const suiteHeader = document.createElement('h3');
+    suiteHeader.textContent = `${suite.name} (${suite.passed}/${suite.tests.length} passed)`;
+    suiteDiv.appendChild(suiteHeader);
+
+    suite.tests.forEach(test => {
+      const testDiv = document.createElement('div');
+      testDiv.className = `test-case ${test.passed ? 'passed' : 'failed'}`;
+
+      const testName = document.createElement('strong');
+      testName.textContent = test.passed ? '✓ ' : '✗ ';
+      testName.textContent += test.name;
+      testDiv.appendChild(testName);
+
+      if (test.duration) {
+        const duration = document.createElement('span');
+        duration.style.marginLeft = '10px';
+        duration.style.fontSize = '12px';
+        duration.style.color = '#666';
+        duration.textContent = `(${test.duration.toFixed(2)}ms)`;
+        testDiv.appendChild(duration);
+      }
+
+      if (!test.passed && test.error) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-details';
+        errorDiv.textContent = test.error;
+        testDiv.appendChild(errorDiv);
+      }
+
+      suiteDiv.appendChild(testDiv);
+    });
+
+    resultsContainer.appendChild(suiteDiv);
+  });
+}
+
+/**
+ * Mock localStorage for testing
+ */
+export function mockLocalStorage() {
+  const store = {};
+
+  return {
+    getItem(key) {
+      return store[key] || null;
+    },
+    setItem(key, value) {
+      store[key] = String(value);
+    },
+    removeItem(key) {
+      delete store[key];
+    },
+    clear() {
+      for (const key in store) {
+        delete store[key];
+      }
+    },
+    get length() {
+      return Object.keys(store).length;
+    },
+    key(index) {
+      const keys = Object.keys(store);
+      return keys[index] || null;
     }
-
-    getOrCreateSuiteDiv(suiteName) {
-        let suiteDiv = document.getElementById(`suite-${suiteName.replace(/\s+/g, '-')}`);
-        if (!suiteDiv) {
-            const outputDiv = document.getElementById('test-output');
-            suiteDiv = document.createElement('div');
-            suiteDiv.className = 'test-suite';
-            suiteDiv.id = `suite-${suiteName.replace(/\s+/g, '-')}`;
-            suiteDiv.innerHTML = `<h3>${suiteName}</h3>`;
-            outputDiv.appendChild(suiteDiv);
-        }
-        return suiteDiv;
-    }
-
-    updateSummary() {
-        document.getElementById('test-summary').style.display = 'block';
-        document.getElementById('total-tests').textContent = this.results.total;
-        document.getElementById('passed-tests').textContent = this.results.passed;
-        document.getElementById('failed-tests').textContent = this.results.failed;
-        document.getElementById('pending-tests').textContent = this.tests.length - this.results.total;
-    }
-
-    expect(actual) {
-        return {
-            toBe: (expected) => {
-                if (actual !== expected) {
-                    throw new Error(`Expected ${expected}, but got ${actual}`);
-                }
-            },
-            toEqual: (expected) => {
-                if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-                    throw new Error(`Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`);
-                }
-            },
-            toBeNull: () => {
-                if (actual !== null) {
-                    throw new Error(`Expected null, but got ${actual}`);
-                }
-            },
-            toBeUndefined: () => {
-                if (actual !== undefined) {
-                    throw new Error(`Expected undefined, but got ${actual}`);
-                }
-            },
-            toBeTruthy: () => {
-                if (!actual) {
-                    throw new Error(`Expected truthy value, but got ${actual}`);
-                }
-            },
-            toBeFalsy: () => {
-                if (actual) {
-                    throw new Error(`Expected falsy value, but got ${actual}`);
-                }
-            },
-            toContain: (expected) => {
-                if (!actual.includes(expected)) {
-                    throw new Error(`Expected "${actual}" to contain "${expected}"`);
-                }
-            },
-            toThrow: () => {
-                let threw = false;
-                try {
-                    actual();
-                } catch (e) {
-                    threw = true;
-                }
-                if (!threw) {
-                    throw new Error('Expected function to throw an error');
-                }
-            },
-            toHaveLength: (length) => {
-                if (actual.length !== length) {
-                    throw new Error(`Expected length ${length}, but got ${actual.length}`);
-                }
-            },
-            toBeInstanceOf: (constructor) => {
-                if (!(actual instanceof constructor)) {
-                    throw new Error(`Expected instance of ${constructor.name}, but got ${actual.constructor.name}`);
-                }
-            }
-        };
-    }
-
-    clearResults() {
-        document.getElementById('test-output').innerHTML = '<p>Click "Run All Tests" to begin comprehensive testing of the Notes App.</p>';
-        document.getElementById('test-summary').style.display = 'none';
-        this.results = { total: 0, passed: 0, failed: 0, pending: 0 };
-    }
+  };
 }
 
-// Create global test framework instance
-const testFramework = new TestFramework();
-const describe = testFramework.describe.bind(testFramework);
-const it = testFramework.it.bind(testFramework);
-const expect = testFramework.expect.bind(testFramework);
-
-// Global test runner functions
-async function runAllTests() {
-    document.getElementById('run-all-btn').textContent = 'Running...';
-    document.getElementById('run-all-btn').disabled = true;
-
-    testFramework.clearResults();
-    await testFramework.runAllTests();
-
-    document.getElementById('run-all-btn').textContent = 'Run All Tests';
-    document.getElementById('run-all-btn').disabled = false;
+/**
+ * Clear test results
+ */
+export function clearResults() {
+  testResults.passed = 0;
+  testResults.failed = 0;
+  testResults.skipped = 0;
+  testResults.tests = [];
+  testResults.suites = [];
 }
 
-function runUnitTests() {
-    const unitTests = testFramework.tests.filter(t =>
-        t.suite.includes('Storage') ||
-        t.suite.includes('Utils') ||
-        t.suite.includes('Unit')
-    );
-    console.log('Running unit tests:', unitTests.length);
-}
-
-function runIntegrationTests() {
-    const integrationTests = testFramework.tests.filter(t =>
-        t.suite.includes('Integration') ||
-        t.suite.includes('CRUD') ||
-        t.suite.includes('UI')
-    );
-    console.log('Running integration tests:', integrationTests.length);
-}
-
-function runUITests() {
-    const uiTests = testFramework.tests.filter(t =>
-        t.suite.includes('UI') ||
-        t.suite.includes('Interface') ||
-        t.suite.includes('Component')
-    );
-    console.log('Running UI tests:', uiTests.length);
-}
-
-function clearResults() {
-    testFramework.clearResults();
-}
-
-// Test utilities
-function createMockStorage() {
-    const mockData = {};
-    return {
-        getItem: (key) => mockData[key] || null,
-        setItem: (key, value) => { mockData[key] = value; },
-        removeItem: (key) => { delete mockData[key]; },
-        clear: () => { Object.keys(mockData).forEach(key => delete mockData[key]); }
-    };
-}
-
-function createMockNote(overrides = {}) {
-    const now = new Date().toISOString();
-    return {
-        id: 'test_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-        title: 'Test Note',
-        content: 'This is a test note content.',
-        createdAt: now,
-        updatedAt: now,
-        ...overrides
-    };
+// Export test results for external use
+export function getTestResults() {
+  return testResults;
 }

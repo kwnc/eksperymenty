@@ -4,54 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NoteNest - Simple Note Taking</title>
-    <link rel="stylesheet" href="styles/main.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
+    <!-- Main Application Container -->
     <div id="app">
         <header>
             <h1>NoteNest</h1>
-            <p>Your distraction-free note taking space</p>
+            <p class="tagline">Your local note-taking companion</p>
         </header>
 
         <main>
-            <section id="note-editor">
-                <h2>Create New Note</h2>
+            <!-- Note Editor Section -->
+            <section id="note-editor" class="card">
+                <h2>Create a Note</h2>
                 <form id="note-form">
-                    <input type="text" id="note-title" placeholder="Note title..." required>
-                    <textarea id="note-content" placeholder="Write your note here..." required></textarea>
-                    <input type="text" id="note-tags" placeholder="Tags (comma-separated)">
-                    <button type="submit" id="save-note">Save Note</button>
+                    <div class="form-group">
+                        <label for="note-title">Title</label>
+                        <input
+                            type="text"
+                            id="note-title"
+                            placeholder="Enter note title..."
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="note-content">Content</label>
+                        <textarea
+                            id="note-content"
+                            rows="6"
+                            placeholder="Write your note here..."
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="note-tags">Tags (comma-separated)</label>
+                        <input
+                            type="text"
+                            id="note-tags"
+                            placeholder="e.g., work, personal, ideas"
+                        >
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Note</button>
+                        <button type="button" id="cancel-btn" class="btn btn-secondary">Clear</button>
+                    </div>
                 </form>
             </section>
 
-            <section id="note-list">
-                <h2>Your Notes</h2>
-                <div id="notes-container">
-                    <p id="no-notes-message">No notes yet. Create your first note above!</p>
+            <!-- Tag Filter Section -->
+            <section id="tag-filter" class="card">
+                <h3>Filter by Tag</h3>
+                <div id="tag-list" class="tag-container">
+                    <span class="tag tag-all active" data-tag="all">Show All</span>
+                    <!-- Tags will be dynamically added here -->
+                </div>
+            </section>
+
+            <!-- Notes List Section -->
+            <section id="notes-section">
+                <h2>My Notes</h2>
+                <div id="notes-list" class="notes-container">
+                    <!-- Note cards will be dynamically added here -->
+                    <p class="empty-state">No notes yet. Create your first note above!</p>
                 </div>
             </section>
         </main>
 
-        <aside id="sidebar">
-            <section id="tag-manager">
-                <h3>Filter by Tags</h3>
-                <div id="tag-list">
-                    <div class="tag-filter active" data-tag="all">
-                        <span>All Notes</span>
-                        <span class="tag-count" id="all-count">0</span>
-                    </div>
-                </div>
-            </section>
-        </aside>
+        <!-- Toast Notification Container -->
+        <div id="toast-container"></div>
     </div>
 
-    <!-- Toast notifications container -->
-    <div id="toast-container"></div>
-
-    <!-- Scripts -->
-    <script src="scripts/storage.js"></script>
-    <script src="scripts/notes.js"></script>
-    <script src="scripts/tags.js"></script>
-    <script src="scripts/app.js"></script>
+    <!-- JavaScript Modules -->
+    <script src="js/storage.js"></script>
+    <script src="js/notes.js"></script>
+    <script src="js/tags.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

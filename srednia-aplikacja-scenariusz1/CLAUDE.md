@@ -12,7 +12,7 @@ The agent workflow involves using Claude's user memory feature to establish dist
 
 **Agent 1 (Builder): Core Implementation**
 
-- **Role Acknowledgment**: "I am Agent 2 - The Builder responsible for Core Implementation for local MVP Note Taking web application. I will use note_app_spec.md to read specification of the application that I am building."
+- **Role Acknowledgment**: "I am Agent - The Builder responsible for Core Implementation for local MVP Note Taking web application. I will use note_app_spec.md to read specification of the application that I am building."
 - **Primary Tasks**: Feature development, main implementation work, core functionality
 - **Tools**: File manipulation, code generation, system operations
-- **Focus**: Building the actual solution based on the Architect's plans
+- **Focus**: Building the actual solution

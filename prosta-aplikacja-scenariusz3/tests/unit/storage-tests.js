@@ -1,230 +1,456 @@
-describe('NotesStorage Unit Tests', () => {
-    let storage;
-    let originalLocalStorage;
+/**
+ * Unit Tests for storage.js
+ * Tests all storage operations
+ */
 
-    // Setup before each test
-    function setup() {
-        // Mock localStorage
-        originalLocalStorage = window.localStorage;
-        window.localStorage = createMockStorage();
-        storage = new NotesStorage();
-    }
+import { describe, it, expect, beforeEach, afterEach } from '../test-framework.js';
+import * as storage from '../../js/storage.js';
 
-    // Cleanup after each test
-    function cleanup() {
-        window.localStorage = originalLocalStorage;
-    }
+// Store original localStorage
+const originalLocalStorage = window.localStorage;
 
-    it('should initialize with empty notes array', () => {
-        setup();
-        const notes = storage.getAllNotes();
-        expect(notes).toEqual([]);
-        cleanup();
+describe('Storage - initStorage()', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('should initialize storage with default structure', () => {
+    const result = storage.initStorage();
+    expect(result).toBeTruthy();
+
+    const data = JSON.parse(localStorage.getItem('notes_app_data'));
+    expect(data).toBeTruthy();
+    expect(Array.isArray(data.notes)).toBeTruthy();
+    expect(data.version).toBe('1.0.0');
+  });
+
+  it('should not overwrite existing storage', () => {
+    storage.initStorage();
+    const testNote = {
+      id: 'test-123',
+      title: 'Test',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    storage.saveNote(testNote);
+
+    storage.initStorage();
+    const notes = storage.getAllNotes();
+    expect(notes.length).toBeGreaterThan(0);
+  });
+});
+
+describe('Storage - saveNote() and getAllNotes()', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+  });
+
+  it('should save a new note', () => {
+    const note = {
+      id: 'test-1',
+      title: 'Test Note',
+      content: 'Test Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    const result = storage.saveNote(note);
+    expect(result.success).toBeTruthy();
+    expect(result.note).toBeTruthy();
+  });
+
+  it('should retrieve all notes', () => {
+    const note1 = {
+      id: 'test-1',
+      title: 'Note 1',
+      content: 'Content 1',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    const note2 = {
+      id: 'test-2',
+      title: 'Note 2',
+      content: 'Content 2',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    storage.saveNote(note1);
+    storage.saveNote(note2);
+
+    const notes = storage.getAllNotes();
+    expect(notes.length).toBe(2);
+  });
+
+  it('should sort notes by updatedAt (most recent first)', () => {
+    const oldNote = {
+      id: 'old',
+      title: 'Old',
+      content: 'Old',
+      createdAt: Date.now() - 10000,
+      updatedAt: Date.now() - 10000
+    };
+
+    const newNote = {
+      id: 'new',
+      title: 'New',
+      content: 'New',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    storage.saveNote(oldNote);
+    storage.saveNote(newNote);
+
+    const notes = storage.getAllNotes();
+    expect(notes[0].id).toBe('new');
+  });
+
+  it('should update existing note', () => {
+    const note = {
+      id: 'test-update',
+      title: 'Original',
+      content: 'Original Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    storage.saveNote(note);
+
+    note.title = 'Updated';
+    const result = storage.saveNote(note);
+
+    expect(result.success).toBeTruthy();
+    expect(result.note.title).toBe('Updated');
+
+    const retrieved = storage.getNoteById('test-update');
+    expect(retrieved.title).toBe('Updated');
+  });
+
+  it('should reject invalid note', () => {
+    const invalidNote = {
+      title: 'No ID',
+      content: 'Content'
+    };
+
+    const result = storage.saveNote(invalidNote);
+    expect(result.success).toBeFalsy();
+    expect(result.error).toBeTruthy();
+  });
+});
+
+describe('Storage - getNoteById()', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+  });
+
+  it('should retrieve note by ID', () => {
+    const note = {
+      id: 'find-me',
+      title: 'Find Me',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    storage.saveNote(note);
+    const retrieved = storage.getNoteById('find-me');
+
+    expect(retrieved).toBeTruthy();
+    expect(retrieved.id).toBe('find-me');
+    expect(retrieved.title).toBe('Find Me');
+  });
+
+  it('should return null for non-existent ID', () => {
+    const result = storage.getNoteById('does-not-exist');
+    expect(result).toBeNull();
+  });
+});
+
+describe('Storage - deleteNote()', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+  });
+
+  it('should delete a note', () => {
+    const note = {
+      id: 'delete-me',
+      title: 'Delete Me',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    storage.saveNote(note);
+    expect(storage.getAllNotes().length).toBe(1);
+
+    const result = storage.deleteNote('delete-me');
+    expect(result).toBeTruthy();
+    expect(storage.getAllNotes().length).toBe(0);
+  });
+
+  it('should return false for non-existent note', () => {
+    const result = storage.deleteNote('does-not-exist');
+    expect(result).toBeFalsy();
+  });
+
+  it('should not affect other notes', () => {
+    const note1 = {
+      id: 'keep-1',
+      title: 'Keep 1',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    const note2 = {
+      id: 'delete-2',
+      title: 'Delete 2',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    storage.saveNote(note1);
+    storage.saveNote(note2);
+
+    storage.deleteNote('delete-2');
+
+    const notes = storage.getAllNotes();
+    expect(notes.length).toBe(1);
+    expect(notes[0].id).toBe('keep-1');
+  });
+});
+
+describe('Storage - updateNote()', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+  });
+
+  it('should update existing note', () => {
+    const note = {
+      id: 'update-me',
+      title: 'Original',
+      content: 'Original Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    storage.saveNote(note);
+
+    const result = storage.updateNote('update-me', { title: 'Updated Title' });
+    expect(result.success).toBeTruthy();
+    expect(result.note.title).toBe('Updated Title');
+    expect(result.note.content).toBe('Original Content');
+  });
+
+  it('should return error for non-existent note', () => {
+    const result = storage.updateNote('does-not-exist', { title: 'New' });
+    expect(result.success).toBeFalsy();
+    expect(result.error).toBeTruthy();
+  });
+
+  it('should preserve original ID and createdAt', () => {
+    const note = {
+      id: 'preserve-test',
+      title: 'Test',
+      content: 'Content',
+      createdAt: 123456,
+      updatedAt: Date.now()
+    };
+
+    storage.saveNote(note);
+    const result = storage.updateNote('preserve-test', {
+      id: 'new-id',
+      title: 'Updated',
+      createdAt: 999999
     });
 
-    it('should create a new note with correct structure', () => {
-        setup();
-        const note = storage.createNote('Test Title', 'Test Content');
+    expect(result.note.id).toBe('preserve-test');
+    expect(result.note.createdAt).toBe(123456);
+  });
+});
 
-        expect(note).toBeTruthy();
-        expect(note.id).toBeTruthy();
-        expect(note.title).toBe('Test Title');
-        expect(note.content).toBe('Test Content');
-        expect(note.createdAt).toBeTruthy();
-        expect(note.updatedAt).toBeTruthy();
-        expect(note.createdAt).toBe(note.updatedAt);
-        cleanup();
-    });
+describe('Storage - searchNotes()', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
 
-    it('should handle empty title and content gracefully', () => {
-        setup();
-        const note = storage.createNote('', '   ');
+    const notes = [
+      {
+        id: '1',
+        title: 'JavaScript Tutorial',
+        content: 'Learn JavaScript basics',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      },
+      {
+        id: '2',
+        title: 'Python Guide',
+        content: 'Python programming language',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      },
+      {
+        id: '3',
+        title: 'Web Development',
+        content: 'HTML, CSS, and JavaScript',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+    ];
 
-        expect(note.title).toBe('Untitled Note');
-        expect(note.content).toBe('');
-        cleanup();
-    });
+    notes.forEach(note => storage.saveNote(note));
+  });
 
-    it('should generate unique IDs for notes', () => {
-        setup();
-        const note1 = storage.createNote('Note 1');
-        const note2 = storage.createNote('Note 2');
+  it('should search by title', () => {
+    const results = storage.searchNotes('JavaScript');
+    expect(results.length).toBe(2); // Matches title in note 1 and content in note 3
+  });
 
-        expect(note1.id).not.toBe(note2.id);
-        cleanup();
-    });
+  it('should search by content', () => {
+    const results = storage.searchNotes('Python');
+    expect(results.length).toBe(1);
+    expect(results[0].id).toBe('2');
+  });
 
-    it('should save and retrieve notes from localStorage', () => {
-        setup();
-        const note = storage.createNote('Persistent Note', 'This should persist');
+  it('should be case-insensitive', () => {
+    const results = storage.searchNotes('javascript');
+    expect(results.length).toBeGreaterThan(0);
+  });
 
-        // Create new storage instance to test persistence
-        const newStorage = new NotesStorage();
-        const notes = newStorage.getAllNotes();
+  it('should return all notes for empty query', () => {
+    const results = storage.searchNotes('');
+    expect(results.length).toBe(3);
+  });
 
-        expect(notes).toHaveLength(1);
-        expect(notes[0].title).toBe('Persistent Note');
-        cleanup();
-    });
+  it('should return empty array for no matches', () => {
+    const results = storage.searchNotes('NonExistentTerm');
+    expect(results.length).toBe(0);
+  });
+});
 
-    it('should update existing notes correctly', () => {
-        setup();
-        const note = storage.createNote('Original Title', 'Original Content');
-        const originalCreatedAt = note.createdAt;
+describe('Storage - getStorageInfo()', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+  });
 
-        // Wait a moment to ensure updatedAt differs
-        setTimeout(() => {
-            const updatedNote = storage.updateNote(note.id, {
-                title: 'Updated Title',
-                content: 'Updated Content'
-            });
+  it('should return storage information', () => {
+    const info = storage.getStorageInfo();
+    expect(info).toBeTruthy();
+    expect(typeof info.used).toBe('number');
+    expect(typeof info.available).toBe('number');
+    expect(typeof info.percentage).toBe('number');
+  });
 
-            expect(updatedNote.title).toBe('Updated Title');
-            expect(updatedNote.content).toBe('Updated Content');
-            expect(updatedNote.createdAt).toBe(originalCreatedAt);
-            expect(updatedNote.updatedAt).not.toBe(originalCreatedAt);
-        }, 10);
-        cleanup();
-    });
+  it('should calculate percentage correctly', () => {
+    const info = storage.getStorageInfo();
+    expect(info.percentage).toBeGreaterThan(-1);
+    expect(info.percentage).toBeLessThan(101);
+  });
 
-    it('should return null when updating non-existent note', () => {
-        setup();
-        const result = storage.updateNote('non-existent-id', { title: 'Test' });
-        expect(result).toBeNull();
-        cleanup();
-    });
+  it('should show increased usage after adding notes', () => {
+    const infoBefore = storage.getStorageInfo();
 
-    it('should delete notes correctly', () => {
-        setup();
-        const note = storage.createNote('To Delete');
-        expect(storage.getAllNotes()).toHaveLength(1);
+    const note = {
+      id: 'test-storage',
+      title: 'Test',
+      content: 'A'.repeat(1000),
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
 
-        const deleted = storage.deleteNote(note.id);
-        expect(deleted).toBe(true);
-        expect(storage.getAllNotes()).toHaveLength(0);
-        cleanup();
-    });
+    storage.saveNote(note);
 
-    it('should return false when deleting non-existent note', () => {
-        setup();
-        const result = storage.deleteNote('non-existent-id');
-        expect(result).toBe(false);
-        cleanup();
-    });
+    const infoAfter = storage.getStorageInfo();
+    expect(infoAfter.used).toBeGreaterThan(infoBefore.used);
+  });
+});
 
-    it('should search notes by title and content', () => {
-        setup();
-        storage.createNote('JavaScript Tutorial', 'Learn about variables and functions');
-        storage.createNote('Python Guide', 'Understanding loops and conditionals');
-        storage.createNote('Web Development', 'JavaScript frameworks and libraries');
+describe('Storage - exportData() and importData()', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+  });
 
-        // Search by title
-        const jsResults = storage.searchNotes('JavaScript');
-        expect(jsResults).toHaveLength(2);
+  it('should export data as JSON string', () => {
+    const note = {
+      id: 'export-test',
+      title: 'Export Test',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
 
-        // Search by content
-        const loopResults = storage.searchNotes('loops');
-        expect(loopResults).toHaveLength(1);
-        expect(loopResults[0].title).toBe('Python Guide');
+    storage.saveNote(note);
+    const exported = storage.exportData();
 
-        // Search case insensitive
-        const caseResults = storage.searchNotes('PYTHON');
-        expect(caseResults).toHaveLength(1);
-        cleanup();
-    });
+    expect(typeof exported).toBe('string');
+    const parsed = JSON.parse(exported);
+    expect(parsed.notes).toBeTruthy();
+    expect(Array.isArray(parsed.notes)).toBeTruthy();
+  });
 
-    it('should return all notes when search query is empty', () => {
-        setup();
-        storage.createNote('Note 1');
-        storage.createNote('Note 2');
+  it('should import data from JSON string', () => {
+    const data = {
+      version: '1.0.0',
+      lastModified: Date.now(),
+      notes: [
+        {
+          id: 'import-test',
+          title: 'Imported',
+          content: 'Imported Content',
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        }
+      ],
+      settings: {}
+    };
 
-        const emptyResults = storage.searchNotes('');
-        const spaceResults = storage.searchNotes('   ');
+    const jsonString = JSON.stringify(data);
+    const result = storage.importData(jsonString);
 
-        expect(emptyResults).toHaveLength(2);
-        expect(spaceResults).toHaveLength(2);
-        cleanup();
-    });
+    expect(result).toBeTruthy();
 
-    it('should sort notes by updatedAt in descending order', () => {
-        setup();
-        const note1 = storage.createNote('First Note');
+    const notes = storage.getAllNotes();
+    expect(notes.length).toBe(1);
+    expect(notes[0].title).toBe('Imported');
+  });
 
-        setTimeout(() => {
-            const note2 = storage.createNote('Second Note');
-            const notes = storage.getAllNotes();
+  it('should reject invalid JSON', () => {
+    const result = storage.importData('invalid json');
+    expect(result).toBeFalsy();
+  });
 
-            expect(notes[0].id).toBe(note2.id); // Most recent first
-            expect(notes[1].id).toBe(note1.id);
-        }, 10);
-        cleanup();
-    });
+  it('should reject data without notes array', () => {
+    const invalidData = JSON.stringify({ version: '1.0.0' });
+    const result = storage.importData(invalidData);
+    expect(result).toBeFalsy();
+  });
+});
 
-    it('should get note by ID correctly', () => {
-        setup();
-        const note = storage.createNote('Find Me');
-        const found = storage.getNoteById(note.id);
+describe('Storage - Error Handling', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+  });
 
-        expect(found).toBeTruthy();
-        expect(found.id).toBe(note.id);
-        expect(found.title).toBe('Find Me');
+  it('should handle empty notes array gracefully', () => {
+    const notes = storage.getAllNotes();
+    expect(Array.isArray(notes)).toBeTruthy();
+    expect(notes.length).toBe(0);
+  });
 
-        const notFound = storage.getNoteById('non-existent');
-        expect(notFound).toBeUndefined();
-        cleanup();
-    });
-
-    it('should provide storage information', () => {
-        setup();
-        storage.createNote('Test Note', 'Some content here');
-        const info = storage.getStorageInfo();
-
-        expect(info.notesCount).toBe(1);
-        expect(info.storageSize).toBeGreaterThan(0);
-        expect(info.storageSizeFormatted).toContain('B');
-        cleanup();
-    });
-
-    it('should export notes data correctly', () => {
-        setup();
-        const note = storage.createNote('Export Test');
-        const exportData = storage.exportNotes();
-
-        expect(exportData.notes).toHaveLength(1);
-        expect(exportData.notes[0].title).toBe('Export Test');
-        expect(exportData.exportedAt).toBeTruthy();
-        expect(exportData.metadata).toBeTruthy();
-        cleanup();
-    });
-
-    it('should import notes data correctly', () => {
-        setup();
-        const importData = {
-            notes: [
-                createMockNote({ title: 'Imported Note 1' }),
-                createMockNote({ title: 'Imported Note 2' })
-            ]
-        };
-
-        const success = storage.importNotes(importData);
-        expect(success).toBe(true);
-
-        const notes = storage.getAllNotes();
-        expect(notes).toHaveLength(2);
-        expect(notes.some(n => n.title === 'Imported Note 1')).toBe(true);
-        cleanup();
-    });
-
-    it('should handle invalid import data', () => {
-        setup();
-        const success1 = storage.importNotes(null);
-        expect(success1).toBe(false);
-
-        const success2 = storage.importNotes({ notes: 'invalid' });
-        expect(success2).toBe(false);
-
-        const success3 = storage.importNotes({});
-        expect(success3).toBe(false);
-        cleanup();
-    });
+  it('should handle corrupted localStorage data', () => {
+    localStorage.setItem('notes_app_data', 'corrupted data');
+    const notes = storage.getAllNotes();
+    expect(Array.isArray(notes)).toBeTruthy();
+  });
 });

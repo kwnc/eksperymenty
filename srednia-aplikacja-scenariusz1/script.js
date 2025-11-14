@@ -1,273 +1,261 @@
-class NoteNest {
+// NoteNest - Simple Note Taking App
+// Local storage management
+
+class NoteApp {
     constructor() {
         this.notes = [];
-        this.currentEditingId = null;
-        this.activeFilter = null;
+        this.currentEditId = null;
         this.init();
     }
 
     init() {
         this.loadNotes();
-        this.bindEvents();
+        this.setupEventListeners();
         this.renderNotes();
-        this.renderTags();
+        this.updateTagFilter();
     }
 
-    bindEvents() {
-        const saveBtn = document.getElementById('saveNote');
-        const clearBtn = document.getElementById('clearNote');
-        const clearFilterBtn = document.getElementById('clearFilter');
-        const tagFilter = document.getElementById('tagFilter');
+    // Load notes from localStorage
+    loadNotes() {
+        const storedNotes = localStorage.getItem('noteNestNotes');
+        if (storedNotes) {
+            try {
+                this.notes = JSON.parse(storedNotes);
+            } catch (error) {
+                console.error('Error loading notes:', error);
+                this.notes = [];
+            }
+        }
+    }
+
+    // Save notes to localStorage
+    saveNotes() {
+        try {
+            localStorage.setItem('noteNestNotes', JSON.stringify(this.notes));
+        } catch (error) {
+            console.error('Error saving notes:', error);
+            this.showToast('Error saving notes', 'error');
+        }
+    }
+
+    // Setup event listeners
+    setupEventListeners() {
+        const saveBtn = document.getElementById('save-note-btn');
+        const cancelBtn = document.getElementById('cancel-edit-btn');
+        const tagFilter = document.getElementById('tag-filter-select');
 
         saveBtn.addEventListener('click', () => this.saveNote());
-        clearBtn.addEventListener('click', () => this.clearForm());
-        clearFilterBtn.addEventListener('click', () => this.clearFilter());
-        tagFilter.addEventListener('input', (e) => this.filterByTag(e.target.value));
+        cancelBtn.addEventListener('click', () => this.cancelEdit());
+        tagFilter.addEventListener('change', (e) => this.filterByTag(e.target.value));
 
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'Enter') {
+        // Allow saving with Ctrl/Cmd + Enter
+        document.getElementById('note-content').addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 this.saveNote();
             }
         });
     }
 
-    generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-
+    // Create or update a note
     saveNote() {
-        const title = document.getElementById('noteTitle').value.trim();
-        const content = document.getElementById('noteContent').value.trim();
-        const tagsInput = document.getElementById('noteTags').value.trim();
+        const title = document.getElementById('note-title').value.trim();
+        const content = document.getElementById('note-content').value.trim();
+        const tagsInput = document.getElementById('note-tags').value.trim();
 
-        if (!title && !content) {
-            this.showToast('Please add a title or content for your note', 'error');
+        if (!title || !content) {
+            this.showToast('Please enter both title and content', 'error');
             return;
         }
 
-        const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+        // Process tags
+        const tags = tagsInput
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(tag => tag.length > 0);
 
-        if (this.currentEditingId) {
-            this.updateNote(this.currentEditingId, title, content, tags);
+        if (this.currentEditId !== null) {
+            // Update existing note
+            const noteIndex = this.notes.findIndex(note => note.id === this.currentEditId);
+            if (noteIndex !== -1) {
+                this.notes[noteIndex] = {
+                    ...this.notes[noteIndex],
+                    title,
+                    content,
+                    tags,
+                    updatedAt: new Date().toISOString()
+                };
+                this.showToast('Note updated successfully', 'success');
+            }
+            this.currentEditId = null;
         } else {
-            this.createNote(title, content, tags);
+            // Create new note
+            const newNote = {
+                id: Date.now(),
+                title,
+                content,
+                tags,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            this.notes.unshift(newNote);
+            this.showToast('Note created successfully', 'success');
         }
-    }
-
-    createNote(title, content, tags) {
-        const note = {
-            id: this.generateId(),
-            title: title || 'Untitled',
-            content,
-            tags,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-
-        this.notes.unshift(note);
-        this.saveNotes();
-        this.renderNotes();
-        this.renderTags();
-        this.clearForm();
-        this.showToast('Note created successfully!');
-    }
-
-    updateNote(id, title, content, tags) {
-        const noteIndex = this.notes.findIndex(note => note.id === id);
-        if (noteIndex === -1) return;
-
-        this.notes[noteIndex] = {
-            ...this.notes[noteIndex],
-            title: title || 'Untitled',
-            content,
-            tags,
-            updatedAt: new Date().toISOString()
-        };
 
         this.saveNotes();
-        this.renderNotes();
-        this.renderTags();
         this.clearForm();
-        this.showToast('Note updated successfully!');
+        this.renderNotes();
+        this.updateTagFilter();
     }
 
+    // Edit a note
     editNote(id) {
         const note = this.notes.find(note => note.id === id);
         if (!note) return;
 
-        document.getElementById('noteTitle').value = note.title === 'Untitled' ? '' : note.title;
-        document.getElementById('noteContent').value = note.content;
-        document.getElementById('noteTags').value = note.tags.join(', ');
+        this.currentEditId = id;
+        document.getElementById('note-title').value = note.title;
+        document.getElementById('note-content').value = note.content;
+        document.getElementById('note-tags').value = note.tags.join(', ');
 
-        this.currentEditingId = id;
-        document.getElementById('saveNote').textContent = 'Update Note';
-        document.getElementById('noteTitle').focus();
+        document.getElementById('editor-title').textContent = 'Edit Note';
+        document.getElementById('save-note-btn').textContent = 'Update Note';
+        document.getElementById('cancel-edit-btn').style.display = 'inline-block';
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scroll to editor
+        document.querySelector('.note-editor').scrollIntoView({ behavior: 'smooth' });
     }
 
+    // Cancel editing
+    cancelEdit() {
+        this.currentEditId = null;
+        this.clearForm();
+    }
+
+    // Delete a note
     deleteNote(id) {
-        if (!confirm('Are you sure you want to delete this note?')) return;
+        if (!confirm('Are you sure you want to delete this note?')) {
+            return;
+        }
 
         this.notes = this.notes.filter(note => note.id !== id);
         this.saveNotes();
         this.renderNotes();
-        this.renderTags();
-        this.showToast('Note deleted successfully!');
-
-        if (this.currentEditingId === id) {
-            this.clearForm();
-        }
+        this.updateTagFilter();
+        this.showToast('Note deleted successfully', 'success');
     }
 
+    // Clear the form
     clearForm() {
-        document.getElementById('noteTitle').value = '';
-        document.getElementById('noteContent').value = '';
-        document.getElementById('noteTags').value = '';
-        this.currentEditingId = null;
-        document.getElementById('saveNote').textContent = 'Save Note';
+        document.getElementById('note-title').value = '';
+        document.getElementById('note-content').value = '';
+        document.getElementById('note-tags').value = '';
+        document.getElementById('editor-title').textContent = 'Create New Note';
+        document.getElementById('save-note-btn').textContent = 'Save Note';
+        document.getElementById('cancel-edit-btn').style.display = 'none';
     }
 
-    filterByTag(filterText) {
-        this.activeFilter = filterText.toLowerCase().trim();
-        this.renderNotes();
-        this.renderTags();
+    // Filter notes by tag
+    filterByTag(tag) {
+        if (tag === 'all') {
+            this.renderNotes();
+        } else {
+            this.renderNotes(tag);
+        }
     }
 
-    clearFilter() {
-        this.activeFilter = null;
-        document.getElementById('tagFilter').value = '';
-        this.renderNotes();
-        this.renderTags();
-    }
+    // Render notes to the DOM
+    renderNotes(filterTag = null) {
+        const container = document.getElementById('notes-container');
 
-    selectTag(tag) {
-        document.getElementById('tagFilter').value = tag;
-        this.filterByTag(tag);
-    }
+        let notesToRender = this.notes;
+        if (filterTag) {
+            notesToRender = this.notes.filter(note => note.tags.includes(filterTag));
+        }
 
-    getFilteredNotes() {
-        if (!this.activeFilter) return this.notes;
+        if (notesToRender.length === 0) {
+            container.innerHTML = '<p class="empty-state">No notes found. Create your first note above!</p>';
+            return;
+        }
 
-        return this.notes.filter(note =>
-            note.tags.some(tag => tag.toLowerCase().includes(this.activeFilter)) ||
-            note.title.toLowerCase().includes(this.activeFilter) ||
-            note.content.toLowerCase().includes(this.activeFilter)
-        );
-    }
+        container.innerHTML = notesToRender.map(note => this.createNoteCard(note)).join('');
 
-    getAllTags() {
-        const tagSet = new Set();
-        this.notes.forEach(note => {
-            note.tags.forEach(tag => tagSet.add(tag));
+        // Add event listeners to buttons
+        notesToRender.forEach(note => {
+            document.querySelector(`[data-edit-id="${note.id}"]`).addEventListener('click', () => this.editNote(note.id));
+            document.querySelector(`[data-delete-id="${note.id}"]`).addEventListener('click', () => this.deleteNote(note.id));
         });
-        return Array.from(tagSet).sort();
     }
 
-    renderTags() {
-        const tagsList = document.getElementById('tagsList');
-        const allTags = this.getAllTags();
+    // Create HTML for a note card
+    createNoteCard(note) {
+        const tagsHtml = note.tags.length > 0
+            ? `<div class="note-tags">
+                ${note.tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
+               </div>`
+            : '';
 
-        if (allTags.length === 0) {
-            tagsList.innerHTML = '<p style="color: #666; font-style: italic;">No tags yet</p>';
-            return;
-        }
-
-        tagsList.innerHTML = allTags.map(tag => {
-            const isActive = this.activeFilter && tag.toLowerCase().includes(this.activeFilter);
-            return `<span class="tag-chip ${isActive ? 'active' : ''}" onclick="noteNest.selectTag('${tag}')">${tag}</span>`;
-        }).join('');
-    }
-
-    renderNotes() {
-        const notesList = document.getElementById('notesList');
-        const filteredNotes = this.getFilteredNotes();
-
-        if (filteredNotes.length === 0) {
-            const emptyMessage = this.activeFilter
-                ? `No notes found matching "${this.activeFilter}"`
-                : 'No notes yet. Create your first note above!';
-
-            notesList.innerHTML = `
-                <div class="empty-state">
-                    <p>${emptyMessage}</p>
-                </div>
-            `;
-            return;
-        }
-
-        notesList.innerHTML = filteredNotes.map(note => this.renderNoteCard(note)).join('');
-    }
-
-    renderNoteCard(note) {
-        const createdDate = new Date(note.createdAt).toLocaleDateString();
-        const updatedDate = new Date(note.updatedAt).toLocaleDateString();
-        const dateText = note.createdAt !== note.updatedAt
-            ? `Updated ${updatedDate}`
-            : `Created ${createdDate}`;
+        const date = new Date(note.updatedAt).toLocaleString();
 
         return `
-            <div class="note-card" data-id="${note.id}">
-                <div class="note-header">
-                    <h3 class="note-title">${this.escapeHtml(note.title)}</h3>
-                    <div class="note-actions">
-                        <button class="btn-edit" onclick="noteNest.editNote('${note.id}')">Edit</button>
-                        <button class="btn-delete" onclick="noteNest.deleteNote('${note.id}')">Delete</button>
-                    </div>
+            <div class="note-card">
+                <h3>${this.escapeHtml(note.title)}</h3>
+                <p>${this.escapeHtml(note.content)}</p>
+                ${tagsHtml}
+                <small style="color: #888; display: block; margin-bottom: 10px;">Last updated: ${date}</small>
+                <div class="note-actions">
+                    <button class="btn-edit" data-edit-id="${note.id}">Edit</button>
+                    <button class="btn-delete" data-delete-id="${note.id}">Delete</button>
                 </div>
-                <div class="note-content">${this.escapeHtml(note.content)}</div>
-                <div class="note-tags">
-                    ${note.tags.map(tag => `<span class="note-tag">${this.escapeHtml(tag)}</span>`).join('')}
-                </div>
-                <div style="margin-top: 15px; font-size: 12px; color: #999;">${dateText}</div>
             </div>
         `;
     }
 
+    // Update tag filter dropdown
+    updateTagFilter() {
+        const select = document.getElementById('tag-filter-select');
+        const allTags = new Set();
+
+        this.notes.forEach(note => {
+            note.tags.forEach(tag => allTags.add(tag));
+        });
+
+        const currentValue = select.value;
+
+        select.innerHTML = '<option value="all">All Notes</option>';
+
+        Array.from(allTags).sort().forEach(tag => {
+            const option = document.createElement('option');
+            option.value = tag;
+            option.textContent = tag;
+            select.appendChild(option);
+        });
+
+        // Restore previous selection if still valid
+        if (currentValue !== 'all' && allTags.has(currentValue)) {
+            select.value = currentValue;
+        }
+    }
+
+    // Show toast notification
+    showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // Escape HTML to prevent XSS
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-
-    showToast(message, type = 'success') {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = `toast ${type}`;
-
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 10);
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 300);
-        }, 3000);
-    }
-
-    saveNotes() {
-        try {
-            localStorage.setItem('noteNest_notes', JSON.stringify(this.notes));
-        } catch (error) {
-            console.error('Failed to save notes:', error);
-            this.showToast('Failed to save notes to local storage', 'error');
-        }
-    }
-
-    loadNotes() {
-        try {
-            const saved = localStorage.getItem('noteNest_notes');
-            if (saved) {
-                this.notes = JSON.parse(saved);
-            }
-        } catch (error) {
-            console.error('Failed to load notes:', error);
-            this.showToast('Failed to load notes from local storage', 'error');
-            this.notes = [];
-        }
-    }
 }
 
-const noteNest = new NoteNest();
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new NoteApp();
+});

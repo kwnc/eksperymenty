@@ -1,0 +1,87 @@
+/**
+ * CSS Custom Properties (Design System Variables)
+ * NoteNest Application
+ *
+ * Usage: var(--variable-name)
+ */
+
+:root {
+    /* Color Palette */
+    /* Primary Colors */
+    --primary-orange: #E97900;
+    --primary-orange-hover: #D06D00;
+    --primary-orange-light: #FF9E2C;
+
+    /* Background Colors */
+    --background-gray: #ECEFF1;
+    --white: #FFFFFF;
+
+    /* Text Colors */
+    --text-dark: #212121;
+    --text-light: #757575;
+    --text-muted: #9E9E9E;
+
+    /* Border Colors */
+    --border-gray: #BDBDBD;
+    --border-light: #E0E0E0;
+
+    /* Feedback Colors */
+    --success-green: #4CAF50;
+    --error-red: #F44336;
+    --warning-yellow: #FFC107;
+    --info-blue: #2196F3;
+
+    /* Spacing Scale */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Typography */
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-base: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-size-2xl: 32px;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.7;
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+    /* Transitions */
+    --transition-fast: 150ms ease-in-out;
+    --transition-base: 250ms ease-in-out;
+    --transition-slow: 350ms ease-in-out;
+
+    /* Z-index Scale */
+    --z-base: 1;
+    --z-dropdown: 100;
+    --z-modal: 1000;
+    --z-toast: 2000;
+
+    /* Layout Constraints */
+    --max-width-sm: 640px;
+    --max-width-md: 768px;
+    --max-width-lg: 1024px;
+    --max-width-xl: 1280px;
+}

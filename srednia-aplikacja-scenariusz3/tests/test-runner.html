@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteNest - Test Runner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #E97900;
+            margin-bottom: 10px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .actions {
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: #E97900;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #D16D00;
+        }
+
+        button.secondary {
+            background-color: #666;
+        }
+
+        button.secondary:hover {
+            background-color: #555;
+        }
+
+        #test-results {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .summary {
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin-bottom: 30px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .summary.success {
+            border-left-color: #4CAF50;
+        }
+
+        .summary.warning {
+            border-left-color: #FF9800;
+        }
+
+        .summary.error {
+            border-left-color: #F44336;
+        }
+
+        .summary h2 {
+            margin-bottom: 15px;
+            color: #212121;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat .label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat .value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212121;
+        }
+
+        .stat .value.passed {
+            color: #4CAF50;
+        }
+
+        .stat .value.failed {
+            color: #F44336;
+        }
+
+        .test-list {
+            margin-top: 30px;
+        }
+
+        .test-list h3 {
+            margin-bottom: 15px;
+            color: #212121;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+
+        .test-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .test-item:last-child {
+            border-bottom: none;
+        }
+
+        .test-item.passed .icon {
+            color: #4CAF50;
+        }
+
+        .test-item.failed .icon {
+            color: #F44336;
+        }
+
+        .test-item .icon {
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 12px;
+            width: 20px;
+        }
+
+        .test-item .name {
+            flex: 1;
+            color: #212121;
+        }
+
+        .test-item .duration {
+            color: #666;
+            font-size: 14px;
+            margin-left: 12px;
+        }
+
+        .test-item .error {
+            width: 100%;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background-color: #ffebee;
+            color: #c62828;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .test-item.failed {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .test-item.failed > div:first-child {
+            display: flex;
+            width: 100%;
+            align-items: center;
+        }
+
+        #console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .console-line {
+            margin-bottom: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading:after {
+            content: "...";
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% {
+                content: ".";
+            }
+            40% {
+                content: "..";
+            }
+            60%, 100% {
+                content: "...";
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 NoteNest Test Suite</h1>
+            <p>Comprehensive testing for the NoteNest application</p>
+
+            <div class="actions">
+                <button onclick="runTests()">Run All Tests</button>
+                <button class="secondary" onclick="cleanupTestData()">Clear Test Data</button>
+                <button class="secondary" onclick="location.reload()">Refresh</button>
+            </div>
+        </div>
+
+        <div id="test-results">
+            <div class="loading">Ready to run tests</div>
+        </div>
+
+        <div id="console-output" style="display: none;">
+            <!-- Console output will be displayed here -->
+        </div>
+    </div>
+
+    <!-- Application Source Files -->
+    <script src="../js/utils.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/notes.js"></script>
+
+    <!-- Test Framework -->
+    <script src="test-framework.js"></script>
+
+    <!-- Test Suites -->
+    <script src="unit/utils-tests.js"></script>
+    <script src="unit/storage-tests.js"></script>
+    <script src="unit/notes-tests.js"></script>
+    <script src="integration/notes-crud-tests.js"></script>
+    <script src="integration/ui-integration-tests.js"></script>
+
+    <script>
+        // Capture console output
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const consoleOutput = [];
+
+        console.log = function(...args) {
+            consoleOutput.push({ type: 'log', message: args.join(' ') });
+            originalConsoleLog.apply(console, args);
+        };
+
+        console.error = function(...args) {
+            consoleOutput.push({ type: 'error', message: args.join(' ') });
+            originalConsoleError.apply(console, args);
+        };
+
+        // Auto-run tests on load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Test runner loaded. Click "Run All Tests" to begin.');
+        });
+    </script>
+</body>
+</html>

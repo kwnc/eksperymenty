@@ -1,0 +1,322 @@
+/**
+ * components.css - Component-Specific Styles
+ * Styles for UI components: note cards, tags, toasts, etc.
+ */
+
+/* ===== Note Cards ===== */
+.note-card {
+  background-color: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.note-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-orange);
+  transform: translateY(-2px);
+}
+
+.note-card:active {
+  transform: translateY(0);
+}
+
+.note-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 var(--space-sm) 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.note-card-preview {
+  font-size: var(--font-size-base);
+  color: var(--text-gray);
+  margin: 0 0 var(--space-md) 0;
+  line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.note-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-gray);
+}
+
+.note-card-date {
+  font-size: var(--font-size-xs);
+  color: var(--text-gray);
+}
+
+.note-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* ===== Tags ===== */
+.tag {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--primary-orange);
+  background-color: var(--primary-orange-light);
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.tag-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: var(--font-family);
+  color: var(--text-dark);
+  background-color: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tag-button:hover {
+  background-color: var(--primary-orange-light);
+  border-color: var(--primary-orange);
+  color: var(--primary-orange);
+}
+
+.tag-count {
+  font-size: var(--font-size-xs);
+  color: var(--text-gray);
+  font-weight: 400;
+}
+
+/* ===== Toast Notifications ===== */
+.toast {
+  min-width: 250px;
+  padding: var(--space-md) var(--space-lg);
+  background-color: var(--white);
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: var(--font-size-base);
+  color: var(--text-dark);
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+  border-left: 4px solid var(--info-blue);
+}
+
+.toast-show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-success {
+  border-left-color: var(--success-green);
+}
+
+.toast-error {
+  border-left-color: var(--error-red);
+}
+
+.toast-info {
+  border-left-color: var(--info-blue);
+}
+
+/* ===== Button Hover States & Focus ===== */
+.btn:focus-visible {
+  outline: 2px solid var(--primary-orange);
+  outline-offset: 2px;
+}
+
+.btn-primary:focus-visible {
+  outline-color: var(--primary-orange-hover);
+}
+
+.btn-danger:focus-visible {
+  outline-color: var(--error-red);
+}
+
+/* ===== Form Input Focus States ===== */
+.form-input:focus-visible {
+  outline: none;
+  border-color: var(--primary-orange);
+  box-shadow: 0 0 0 3px var(--primary-orange-light);
+}
+
+/* ===== Loading States ===== */
+.loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--border-gray);
+  border-top-color: var(--primary-orange);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== Modal Animations ===== */
+.modal {
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ===== Empty State Styling ===== */
+.empty-state p {
+  font-size: var(--font-size-lg);
+  color: var(--text-gray);
+  text-align: center;
+  padding: var(--space-2xl);
+}
+
+/* ===== Scrollbar Styling ===== */
+.content-area::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content-area::-webkit-scrollbar-track,
+.sidebar::-webkit-scrollbar-track {
+  background: var(--bg-light-gray);
+}
+
+.content-area::-webkit-scrollbar-thumb,
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-gray);
+  border-radius: 4px;
+}
+
+.content-area::-webkit-scrollbar-thumb:hover,
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-gray);
+}
+
+/* ===== Focus Visible for Accessibility ===== */
+.note-card:focus-visible,
+.nav-link:focus-visible,
+.tag-button:focus-visible {
+  outline: 2px solid var(--primary-orange);
+  outline-offset: 2px;
+}
+
+/* ===== Selection Color ===== */
+::selection {
+  background-color: var(--primary-orange-light);
+  color: var(--text-dark);
+}
+
+/* ===== Transitions for View Changes ===== */
+.notes-list-view,
+.note-editor-view {
+  animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (max-width: 767px) {
+  .note-card {
+    padding: var(--space-md);
+  }
+
+  .toast {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .modal-content {
+    padding: var(--space-lg);
+  }
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  .app-header,
+  .sidebar,
+  .btn,
+  .modal,
+  .toast-container {
+    display: none !important;
+  }
+
+  .note-editor-view {
+    display: block !important;
+  }
+
+  .form-input {
+    border: none;
+    padding: 0;
+  }
+
+  .note-metadata {
+    border-top: 1px solid #ccc;
+  }
+}

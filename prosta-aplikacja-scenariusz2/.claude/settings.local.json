@@ -1,13 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm create:*)",
-      "Bash(npm install)",
-      "Bash(npm install:*)",
-      "Bash(npx tailwindcss init:*)",
-      "Bash(npm exec:*)",
-      "Bash(npm run dev:*)",
-      "Bash(npm run build:*)"
+      "Bash(tree:*)",
+      "Bash(open:*)"
     ],
     "deny": [],
     "ask": []

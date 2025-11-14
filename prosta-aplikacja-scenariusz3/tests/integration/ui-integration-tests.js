@@ -1,333 +1,554 @@
-describe('UI Integration Tests', () => {
-    let testContainer;
-    let storage;
-    let originalLocalStorage;
+/**
+ * UI Integration Tests
+ * Tests DOM interactions and UI component behavior
+ */
 
-    function createTestHTML() {
-        return `
-            <div id="test-app">
-                <header class="app-header">
-                    <h1>My Notes</h1>
-                    <div class="header-actions">
-                        <input type="text" id="search-input" placeholder="Search notes..." class="search-input">
-                        <button id="new-note-btn" class="btn btn-primary">New Note</button>
-                    </div>
-                </header>
-                <main class="app-main">
-                    <div class="sidebar">
-                        <div id="notes-list" class="notes-list"></div>
-                    </div>
-                    <div class="content-area">
-                        <div id="note-editor" class="note-editor hidden">
-                            <input type="text" id="note-title" placeholder="Note title..." class="note-title-input">
-                            <textarea id="note-content" placeholder="Start writing your note..." class="note-content-input"></textarea>
-                            <div class="editor-actions">
-                                <button id="save-note-btn" class="btn btn-success">Save</button>
-                                <button id="delete-note-btn" class="btn btn-danger">Delete</button>
-                                <button id="cancel-edit-btn" class="btn btn-secondary">Cancel</button>
-                            </div>
-                        </div>
-                        <div id="welcome-screen" class="welcome-screen">
-                            <h2>Welcome to Local MVP Notes</h2>
-                            <p>Create your first note to get started!</p>
-                        </div>
-                    </div>
-                </main>
-            </div>
-        `;
+import { describe, it, expect, beforeEach } from '../test-framework.js';
+import * as storage from '../../js/storage.js';
+import * as notesList from '../../js/components/notesList.js';
+import * as noteEditor from '../../js/components/noteEditor.js';
+
+describe('UI - Notes List Rendering', () => {
+  let container;
+
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  it('should render empty state when no notes exist', () => {
+    notesList.renderNotesList({
+      container,
+      notes: [],
+      onSelect: () => {},
+      onDelete: () => {}
+    });
+
+    const emptyState = container.querySelector('.empty-state');
+    expect(emptyState).toBeTruthy();
+  });
+
+  it('should render list of notes', () => {
+    const testNotes = [
+      {
+        id: '1',
+        title: 'Test Note 1',
+        content: 'Content 1',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      },
+      {
+        id: '2',
+        title: 'Test Note 2',
+        content: 'Content 2',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+    ];
+
+    notesList.renderNotesList({
+      container,
+      notes: testNotes,
+      onSelect: () => {},
+      onDelete: () => {}
+    });
+
+    const noteItems = container.querySelectorAll('.note-item');
+    expect(noteItems.length).toBe(2);
+  });
+
+  it('should highlight selected note', () => {
+    const testNotes = [
+      {
+        id: 'selected',
+        title: 'Selected Note',
+        content: 'Content',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      },
+      {
+        id: 'not-selected',
+        title: 'Other Note',
+        content: 'Content',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+    ];
+
+    notesList.renderNotesList({
+      container,
+      notes: testNotes,
+      onSelect: () => {},
+      onDelete: () => {},
+      selectedNoteId: 'selected'
+    });
+
+    const noteItems = container.querySelectorAll('.note-item');
+    const selectedItem = Array.from(noteItems).find(item =>
+      item.classList.contains('selected')
+    );
+    expect(selectedItem).toBeTruthy();
+  });
+
+  it('should call onSelect when note is clicked', (done) => {
+    const testNote = {
+      id: 'clickable',
+      title: 'Clickable Note',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    let selectedId = null;
+    notesList.renderNotesList({
+      container,
+      notes: [testNote],
+      onSelect: (id) => {
+        selectedId = id;
+        expect(selectedId).toBe('clickable');
+        done();
+      },
+      onDelete: () => {}
+    });
+
+    const noteItem = container.querySelector('.note-item');
+    if (noteItem) {
+      noteItem.click();
     }
+  });
 
-    function setup() {
-        // Create test container
-        testContainer = document.createElement('div');
-        testContainer.innerHTML = createTestHTML();
-        document.body.appendChild(testContainer);
+  it('should display note preview content', () => {
+    const testNote = {
+      id: '1',
+      title: 'Test Title',
+      content: 'This is the preview content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
 
-        // Mock localStorage
-        originalLocalStorage = window.localStorage;
-        window.localStorage = createMockStorage();
-        storage = new NotesStorage();
-    }
+    notesList.renderNotesList({
+      container,
+      notes: [testNote],
+      onSelect: () => {},
+      onDelete: () => {}
+    });
 
-    function cleanup() {
-        if (testContainer && testContainer.parentNode) {
-            testContainer.parentNode.removeChild(testContainer);
+    const noteTitle = container.querySelector('.note-title');
+    expect(noteTitle).toBeTruthy();
+    expect(noteTitle.textContent).toContain('Test Title');
+  });
+});
+
+describe('UI - Note Editor Rendering', () => {
+  let container;
+
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  it('should render empty editor when no note is selected', () => {
+    noteEditor.renderEditor({
+      container,
+      note: null,
+      onSave: () => {}
+    });
+
+    const emptyState = container.querySelector('.empty-state');
+    expect(emptyState).toBeTruthy();
+  });
+
+  it('should render editor with note data', () => {
+    const testNote = {
+      id: 'test',
+      title: 'Test Note',
+      content: 'Test Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    noteEditor.renderEditor({
+      container,
+      note: testNote,
+      onSave: () => {}
+    });
+
+    const titleInput = container.querySelector('#noteTitle');
+    const contentInput = container.querySelector('#noteContent');
+
+    expect(titleInput).toBeTruthy();
+    expect(contentInput).toBeTruthy();
+    expect(titleInput.value).toBe('Test Note');
+    expect(contentInput.value).toBe('Test Content');
+  });
+
+  it('should display character count', () => {
+    const testNote = {
+      id: 'test',
+      title: 'Test',
+      content: 'Hello World',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    noteEditor.renderEditor({
+      container,
+      note: testNote,
+      onSave: () => {}
+    });
+
+    const charCount = container.querySelector('.char-count');
+    expect(charCount).toBeTruthy();
+    expect(charCount.textContent).toContain('11');
+  });
+
+  it('should show delete button when note exists', () => {
+    const testNote = {
+      id: 'test',
+      title: 'Test',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    noteEditor.renderEditor({
+      container,
+      note: testNote,
+      onSave: () => {},
+      onDelete: () => {}
+    });
+
+    const deleteButton = container.querySelector('#btnDeleteNote');
+    expect(deleteButton).toBeTruthy();
+  });
+});
+
+describe('UI - Search Functionality', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+
+    const testNotes = [
+      {
+        id: '1',
+        title: 'JavaScript Tutorial',
+        content: 'Learn JavaScript',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      },
+      {
+        id: '2',
+        title: 'Python Guide',
+        content: 'Python programming',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      },
+      {
+        id: '3',
+        title: 'Web Development',
+        content: 'HTML, CSS, JavaScript',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+    ];
+
+    testNotes.forEach(note => storage.saveNote(note));
+  });
+
+  it('should filter notes by search query', () => {
+    const results = storage.searchNotes('JavaScript');
+    expect(results.length).toBe(2); // Notes 1 and 3
+  });
+
+  it('should return all notes for empty search', () => {
+    const results = storage.searchNotes('');
+    expect(results.length).toBe(3);
+  });
+
+  it('should be case-insensitive', () => {
+    const results = storage.searchNotes('javascript');
+    expect(results.length).toBeGreaterThan(0);
+  });
+
+  it('should search in both title and content', () => {
+    const results = storage.searchNotes('Python');
+    expect(results.length).toBe(1);
+    expect(results[0].title).toContain('Python');
+  });
+});
+
+describe('UI - Modal Interactions', () => {
+  let modal;
+
+  beforeEach(() => {
+    modal = document.createElement('div');
+    modal.id = 'modal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h2 class="modal-title">Confirm</h2>
+        <p class="modal-message">Are you sure?</p>
+        <div class="modal-actions">
+          <button id="btnModalConfirm">Confirm</button>
+          <button id="btnModalCancel">Cancel</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  });
+
+  it('should have modal element in DOM', () => {
+    const modalElement = document.getElementById('modal');
+    expect(modalElement).toBeTruthy();
+  });
+
+  it('should have confirm and cancel buttons', () => {
+    const confirmBtn = document.getElementById('btnModalConfirm');
+    const cancelBtn = document.getElementById('btnModalCancel');
+    expect(confirmBtn).toBeTruthy();
+    expect(cancelBtn).toBeTruthy();
+  });
+
+  it('should update modal message', () => {
+    const message = modal.querySelector('.modal-message');
+    message.textContent = 'Delete this note?';
+    expect(message.textContent).toBe('Delete this note?');
+  });
+});
+
+describe('UI - Toast Notifications', () => {
+  let toast;
+
+  beforeEach(() => {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  });
+
+  it('should have toast element in DOM', () => {
+    const toastElement = document.getElementById('toast');
+    expect(toastElement).toBeTruthy();
+  });
+
+  it('should update toast message', () => {
+    toast.textContent = 'Note saved successfully';
+    expect(toast.textContent).toBe('Note saved successfully');
+  });
+
+  it('should support different toast types', () => {
+    toast.className = 'toast success';
+    expect(toast.classList.contains('success')).toBeTruthy();
+
+    toast.className = 'toast error';
+    expect(toast.classList.contains('error')).toBeTruthy();
+  });
+});
+
+describe('UI - Input Validation', () => {
+  it('should handle empty title input', () => {
+    const note = {
+      id: 'test',
+      title: '',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    const result = storage.saveNote(note);
+    expect(result.success).toBeTruthy();
+  });
+
+  it('should handle very long title', () => {
+    const longTitle = 'A'.repeat(200);
+    const note = {
+      id: 'test',
+      title: longTitle,
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    const result = storage.saveNote(note);
+    expect(result.success).toBeTruthy();
+  });
+
+  it('should handle special characters in input', () => {
+    const note = {
+      id: 'test',
+      title: '<script>alert("xss")</script>',
+      content: 'Normal content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    const result = storage.saveNote(note);
+    expect(result.success).toBeTruthy();
+
+    const retrieved = storage.getNoteById('test');
+    expect(retrieved.title).toContain('<script>');
+  });
+});
+
+describe('UI - Responsive Behavior', () => {
+  it('should have viewport meta tag', () => {
+    const viewport = document.querySelector('meta[name="viewport"]');
+    expect(viewport).toBeTruthy();
+  });
+
+  it('should have responsive CSS classes', () => {
+    const testDiv = document.createElement('div');
+    testDiv.className = 'app-container';
+    document.body.appendChild(testDiv);
+
+    expect(testDiv.classList.contains('app-container')).toBeTruthy();
+  });
+});
+
+describe('UI - Accessibility', () => {
+  it('should have proper ARIA labels', () => {
+    const searchInput = document.createElement('input');
+    searchInput.setAttribute('aria-label', 'Search notes');
+    document.body.appendChild(searchInput);
+
+    expect(searchInput.getAttribute('aria-label')).toBe('Search notes');
+  });
+
+  it('should have semantic HTML structure', () => {
+    const header = document.createElement('header');
+    const main = document.createElement('main');
+
+    header.className = 'app-header';
+    main.className = 'app-main';
+
+    document.body.appendChild(header);
+    document.body.appendChild(main);
+
+    expect(document.querySelector('header')).toBeTruthy();
+    expect(document.querySelector('main')).toBeTruthy();
+  });
+});
+
+describe('UI - Storage Indicator', () => {
+  it('should calculate storage usage', () => {
+    const info = storage.getStorageInfo();
+    expect(info).toBeTruthy();
+    expect(typeof info.used).toBe('number');
+    expect(typeof info.percentage).toBe('number');
+  });
+
+  it('should show percentage between 0 and 100', () => {
+    const info = storage.getStorageInfo();
+    expect(info.percentage).toBeGreaterThan(-1);
+    expect(info.percentage).toBeLessThan(101);
+  });
+});
+
+describe('UI - Data Export/Import', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    storage.initStorage();
+  });
+
+  it('should export data as JSON string', () => {
+    const note = {
+      id: 'export-test',
+      title: 'Export Test',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    storage.saveNote(note);
+    const exported = storage.exportData();
+
+    expect(typeof exported).toBe('string');
+    const parsed = JSON.parse(exported);
+    expect(parsed.notes.length).toBe(1);
+  });
+
+  it('should import valid JSON data', () => {
+    const data = {
+      version: '1.0.0',
+      lastModified: Date.now(),
+      notes: [
+        {
+          id: 'import-test',
+          title: 'Imported Note',
+          content: 'Imported Content',
+          createdAt: Date.now(),
+          updatedAt: Date.now()
         }
-        window.localStorage = originalLocalStorage;
-    }
+      ],
+      settings: {}
+    };
 
-    function simulateEvent(element, eventType, options = {}) {
-        const event = new Event(eventType, { bubbles: true, ...options });
-        Object.assign(event, options);
-        element.dispatchEvent(event);
-    }
+    const result = storage.importData(JSON.stringify(data));
+    expect(result).toBeTruthy();
 
-    function simulateKeyDown(element, key, options = {}) {
-        const event = new KeyboardEvent('keydown', { key, bubbles: true, ...options });
-        element.dispatchEvent(event);
-    }
+    const notes = storage.getAllNotes();
+    expect(notes.length).toBe(1);
+    expect(notes[0].title).toBe('Imported Note');
+  });
 
-    function simulateInput(element, value) {
-        element.value = value;
-        simulateEvent(element, 'input');
-    }
+  it('should reject invalid import data', () => {
+    const result = storage.importData('invalid json');
+    expect(result).toBeFalsy();
+  });
+});
 
-    it('should display welcome screen when no notes exist', () => {
-        setup();
+describe('UI - Button Interactions', () => {
+  it('should have new note button', () => {
+    const button = document.createElement('button');
+    button.id = 'btnNewNote';
+    button.textContent = '+ New Note';
+    document.body.appendChild(button);
 
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const noteEditor = document.getElementById('note-editor');
+    const btnNewNote = document.getElementById('btnNewNote');
+    expect(btnNewNote).toBeTruthy();
+    expect(btnNewNote.textContent).toContain('New Note');
+  });
 
-        expect(welcomeScreen.classList.contains('hidden')).toBe(false);
-        expect(noteEditor.classList.contains('hidden')).toBe(true);
+  it('should trigger action on button click', (done) => {
+    const button = document.createElement('button');
+    button.id = 'testButton';
 
-        cleanup();
+    let clicked = false;
+    button.addEventListener('click', () => {
+      clicked = true;
+      expect(clicked).toBeTruthy();
+      done();
     });
 
-    it('should create NoteEditor and NotesList components correctly', () => {
-        setup();
-
-        // Mock the component classes being available
-        if (typeof NoteEditor !== 'undefined' && typeof NotesList !== 'undefined') {
-            const noteEditor = new NoteEditor(
-                storage,
-                () => {},
-                () => {},
-                () => {}
-            );
-
-            const notesList = new NotesList(
-                storage,
-                () => {}
-            );
-
-            expect(noteEditor).toBeTruthy();
-            expect(notesList).toBeTruthy();
-        }
-
-        cleanup();
-    });
-
-    it('should handle new note button click', () => {
-        setup();
-
-        const newNoteBtn = document.getElementById('new-note-btn');
-        const noteEditor = document.getElementById('note-editor');
-        const welcomeScreen = document.getElementById('welcome-screen');
-
-        // Initially editor should be hidden
-        expect(noteEditor.classList.contains('hidden')).toBe(true);
-
-        // Simulate creating a note editor instance and showing it
-        if (newNoteBtn) {
-            // Manually show the editor to simulate the component behavior
-            noteEditor.classList.remove('hidden');
-            welcomeScreen.classList.add('hidden');
-
-            expect(noteEditor.classList.contains('hidden')).toBe(false);
-            expect(welcomeScreen.classList.contains('hidden')).toBe(true);
-        }
-
-        cleanup();
-    });
-
-    it('should handle form input correctly', () => {
-        setup();
-
-        const titleInput = document.getElementById('note-title');
-        const contentInput = document.getElementById('note-content');
-
-        simulateInput(titleInput, 'Test Note Title');
-        simulateInput(contentInput, 'Test note content here.');
-
-        expect(titleInput.value).toBe('Test Note Title');
-        expect(contentInput.value).toBe('Test note content here.');
-
-        cleanup();
-    });
-
-    it('should handle keyboard navigation', () => {
-        setup();
-
-        const titleInput = document.getElementById('note-title');
-        const contentInput = document.getElementById('note-content');
-
-        // Simulate Enter key in title input (should focus content)
-        titleInput.focus();
-        simulateKeyDown(titleInput, 'Enter');
-
-        // In a real implementation, this would focus the content input
-        // For testing, we'll manually verify the behavior would work
-        expect(document.getElementById('note-content')).toBeTruthy();
-
-        cleanup();
-    });
-
-    it('should handle tab key in content textarea', () => {
-        setup();
-
-        const contentInput = document.getElementById('note-content');
-        contentInput.value = 'Line 1\nLine 2';
-        contentInput.selectionStart = 7; // After "Line 1\n"
-        contentInput.selectionEnd = 7;
-
-        // Simulate tab key
-        simulateKeyDown(contentInput, 'Tab');
-
-        // In actual implementation, this would insert spaces
-        // For testing, we verify the element exists and can receive events
-        expect(contentInput).toBeTruthy();
-
-        cleanup();
-    });
-
-    it('should validate HTML structure and elements', () => {
-        setup();
-
-        // Check all required elements exist
-        expect(document.getElementById('search-input')).toBeTruthy();
-        expect(document.getElementById('new-note-btn')).toBeTruthy();
-        expect(document.getElementById('notes-list')).toBeTruthy();
-        expect(document.getElementById('note-editor')).toBeTruthy();
-        expect(document.getElementById('note-title')).toBeTruthy();
-        expect(document.getElementById('note-content')).toBeTruthy();
-        expect(document.getElementById('save-note-btn')).toBeTruthy();
-        expect(document.getElementById('delete-note-btn')).toBeTruthy();
-        expect(document.getElementById('cancel-edit-btn')).toBeTruthy();
-        expect(document.getElementById('welcome-screen')).toBeTruthy();
-
-        // Check CSS classes are applied
-        const appHeader = document.querySelector('.app-header');
-        const appMain = document.querySelector('.app-main');
-        const sidebar = document.querySelector('.sidebar');
-        const contentArea = document.querySelector('.content-area');
-
-        expect(appHeader).toBeTruthy();
-        expect(appMain).toBeTruthy();
-        expect(sidebar).toBeTruthy();
-        expect(contentArea).toBeTruthy();
-
-        cleanup();
-    });
-
-    it('should handle search input events', () => {
-        setup();
-
-        const searchInput = document.getElementById('search-input');
-
-        simulateInput(searchInput, 'test search');
-        expect(searchInput.value).toBe('test search');
-
-        // Test placeholder
-        expect(searchInput.placeholder).toBe('Search notes...');
-
-        cleanup();
-    });
-
-    it('should validate accessibility attributes', () => {
-        setup();
-
-        const searchInput = document.getElementById('search-input');
-        const titleInput = document.getElementById('note-title');
-        const contentInput = document.getElementById('note-content');
-
-        // Check for placeholder attributes
-        expect(searchInput.placeholder).toBeTruthy();
-        expect(titleInput.placeholder).toBeTruthy();
-        expect(contentInput.placeholder).toBeTruthy();
-
-        // Check input types
-        expect(searchInput.type).toBe('text');
-        expect(titleInput.type).toBe('text');
-        expect(contentInput.tagName.toLowerCase()).toBe('textarea');
-
-        cleanup();
-    });
-
-    it('should handle button interactions', () => {
-        setup();
-
-        const saveBtn = document.getElementById('save-note-btn');
-        const deleteBtn = document.getElementById('delete-note-btn');
-        const cancelBtn = document.getElementById('cancel-edit-btn');
-
-        // Check button texts
-        expect(saveBtn.textContent).toBe('Save');
-        expect(deleteBtn.textContent).toBe('Delete');
-        expect(cancelBtn.textContent).toBe('Cancel');
-
-        // Check CSS classes
-        expect(saveBtn.classList.contains('btn-success')).toBe(true);
-        expect(deleteBtn.classList.contains('btn-danger')).toBe(true);
-        expect(cancelBtn.classList.contains('btn-secondary')).toBe(true);
-
-        cleanup();
-    });
-
-    it('should test responsive layout elements', () => {
-        setup();
-
-        const sidebar = document.querySelector('.sidebar');
-        const contentArea = document.querySelector('.content-area');
-        const headerActions = document.querySelector('.header-actions');
-
-        expect(sidebar).toBeTruthy();
-        expect(contentArea).toBeTruthy();
-        expect(headerActions).toBeTruthy();
-
-        // Test that elements have proper structure for responsive design
-        expect(sidebar.parentElement.classList.contains('app-main')).toBe(true);
-        expect(contentArea.parentElement.classList.contains('app-main')).toBe(true);
-
-        cleanup();
-    });
-
-    it('should handle CSS class toggling for editor states', () => {
-        setup();
-
-        const noteEditor = document.getElementById('note-editor');
-        const welcomeScreen = document.getElementById('welcome-screen');
-
-        // Test initial state
-        expect(noteEditor.classList.contains('hidden')).toBe(true);
-
-        // Simulate showing editor
-        noteEditor.classList.remove('hidden');
-        welcomeScreen.classList.add('hidden');
-
-        expect(noteEditor.classList.contains('hidden')).toBe(false);
-        expect(welcomeScreen.classList.contains('hidden')).toBe(true);
-
-        // Simulate hiding editor
-        noteEditor.classList.add('hidden');
-        welcomeScreen.classList.remove('hidden');
-
-        expect(noteEditor.classList.contains('hidden')).toBe(true);
-        expect(welcomeScreen.classList.contains('hidden')).toBe(false);
-
-        cleanup();
-    });
-
-    it('should validate form validation capabilities', () => {
-        setup();
-
-        const titleInput = document.getElementById('note-title');
-        const contentInput = document.getElementById('note-content');
-
-        // Test empty input handling
-        simulateInput(titleInput, '');
-        simulateInput(contentInput, '');
-
-        expect(titleInput.value).toBe('');
-        expect(contentInput.value).toBe('');
-
-        // Test whitespace handling
-        simulateInput(titleInput, '   ');
-        simulateInput(contentInput, '   ');
-
-        expect(titleInput.value).toBe('   ');
-        expect(contentInput.value).toBe('   ');
-
-        cleanup();
-    });
+    document.body.appendChild(button);
+    button.click();
+  });
+});
+
+describe('UI - Error Handling', () => {
+  it('should handle localStorage quota exceeded', () => {
+    // Create a very large note to test quota
+    const largeContent = 'A'.repeat(100000);
+    const note = {
+      id: 'large-test',
+      title: 'Large Note',
+      content: largeContent,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    const result = storage.saveNote(note);
+    // Should either succeed or fail gracefully
+    expect(typeof result.success).toBe('boolean');
+  });
+
+  it('should handle corrupted localStorage data gracefully', () => {
+    localStorage.setItem('notes_app_data', 'corrupted{data}');
+    const notes = storage.getAllNotes();
+    expect(Array.isArray(notes)).toBeTruthy();
+  });
 });

@@ -38,9 +38,9 @@ Podczas tego scenariusza system wygenerował bardziej złożoną aplikację. Cza
 W wyniku scenariusza powstała aplikacja przypominająca scenariusz 1, z tą różnicą, że jest bardziej dopracowana, a czas jej generowania wyniósł 15 minut. Aplikacja posiada te same funkcjonalności, jednak poza nimi występują również notyfikacje o pomyślnie zapisanej lub usuniętej notatce. Interfejs użytkownika również jest dopracowany względem scenariusza 1.
 
 \subsubsection*{Wyniki}
-Wyniki wskazują, że dla prostego celu (notatnik bez szczegółowej specyfikacji) najlepszy kompromis jakości i kosztu osiąga konfiguracja z jednym agentem: najwyższa ocena funkcjonalności i stabilności (brak błędów) przy akceptowalnej estetyce i prostym, czytelnym interfejsie. Układ architekt–programista poszerza zakres rozwiązania, lecz obniża jakość interfejsu i estetyki, mimo zachowania stabilności. Należy podkreślić, że żaden scenariusz nie wygenerował błędów, które przeszkodziłyby aplikacji w funkcjonowaniu.
+Wyniki wskazują, że dla prostego celu (notatnik bez szczegółowej specyfikacji) najlepszy kompromis jakości i kosztu osiąga konfiguracja z jednym agentem: najwyższa ocena funkcjonalności i stabilności (brak błędów) przy akceptowalnej estetyce i prostym, czytelnym interfejsie. Układ architekt–programista poszerza zakres rozwiązania, lecz obniża jakość interfejsu i estetyki, mimo zachowania stabilności. Należy podkreślić, że żaden scenariusz nie wygenerował błędów, które przeszkodziłyby aplikacji w jej funkcjonowaniu.
 
-W konsekwencji, dla zadań o niskiej złożoności zalecane jest użycie pojedynczego agenta. Konfiguracje wieloagentowe mają uzasadnienie dopiero przy bogatszych wymaganiach wejściowych oraz jasno zdefiniowanych rolach.
+W konsekwencji, dla zadań o niskiej złożoności zaleca się użycie pojedynczego agenta. Konfiguracje wieloagentowe mają uzasadnienie dopiero przy bogatszych wymaganiach wejściowych oraz jasno zdefiniowanych rolach.
 
 \begin{table}[h!]
     \centering
@@ -52,13 +52,13 @@ W konsekwencji, dla zadań o niskiej złożoności zalecane jest użycie pojedyn
     \hline
     \textbf{interfejs użytkownika} & 4 & 3 & 5 \\
     \hline
-    \textbf{estetyka} & 4 & 1 & 5 \\
+    \textbf{estetyka} & 4 & 3 & 5 \\
     \hline
     \textbf{brak błędów} & 5 & 5 & 5 \\
     \hline
-    \textbf{czas generowania} & 5 min & 10 min & 15 min \\
+    \textbf{czas generowania} & 3 min & 9 min & 24 min \\
     \hline
-    \textbf{liczba tokenów} & 12k & 28k & 45k \\
+    \textbf{liczba tokenów} & 6k & 31k & 95k \\
     \hline
     \end{tabular}
     \caption{Wyniki eksperymentu wygenerowania aplikacji na podstawie prostego zapytania}
@@ -69,7 +69,7 @@ W konsekwencji, dla zadań o niskiej złożoności zalecane jest użycie pojedyn
 W drugim eksperymencie system agentowy otrzymał zapytanie o wygenerowanie aplikacji notatnika wraz z dołączoną podstawową specyfikacją w formie pliku tekstowego. Specyfikacja zawierała listę funkcji, które aplikacja powinna posiadać (np. dodawanie, edycja i usuwanie notatek), uproszczony model danych oraz ogólne wymagania dotyczące interfejsu użytkownika. Celem eksperymentu było sprawdzenie, w jakim stopniu system agentowy potrafi wykorzystać prostą dokumentację techniczną do wygenerowania aplikacji.
 
 \subsubsection*{Scenariusz 1 - podstawowy agent}
-Pojedynczy agent analizujący dokumentację był w stanie poprawnie wygenerować kod, który odpowiadał większości założeń ze specyfikacji. Czas generowania aplikacji wyniósł 15 minut.
+Pojedynczy agent analizujący dokumentację był w stanie poprawnie wygenerować kod, który odpowiadał większości założeń specyfikacji. Czas generowania aplikacji wyniósł 15 minut.
 
 \subsubsection*{Scenariusz 2 - system architekt-programista}
 W tym scenariuszu jeden agent analizował wymagania, a drugi generował kod. Czas generowania aplikacji wyniósł 25 minut. Taka separacja ról pozwoliła uzyskać kod lepiej odwzorowujący specyfikację. W tym wypadku przepływ danych kilku agentów na podstawie dostarczonej podstawowej specyfikacji znacząco poprawia jakość wygenerowanej aplikacji.
@@ -100,9 +100,9 @@ Najlepsze wyniki uzyskano w autonomicznym układzie wieloagentowym — pełna fu
     \hline
     \textbf{brak błędów} & 5 & 5 & 5 \\
     \hline
-    \textbf{czas generowania} & 15 min & 25 min & 40 min \\
+    \textbf{czas generowania} & 2 min & 10 min & 25 min \\
     \hline
-    \textbf{liczba tokenów} & 35k & 62k & 98k \\
+    \textbf{liczba tokenów} & 8k & 41k & 84k \\
     \hline
     \end{tabular}
     \caption{Wyniki eksperymentu aplikacji na podstawie specyfikacji}
@@ -142,9 +142,9 @@ Wyniki zestawione w tabeli \ref{table:eksperyment-z-zaawansowana-specyfikacja-ap
     \hline
     \textbf{brak błędów} & 3 & 3 & 5 \\
     \hline
-    \textbf{czas generowania} & 30 min & 60 m & 120 m \\
+    \textbf{czas generowania} & 3 min & 12 m & 26 m \\
     \hline
-    \textbf{liczba tokenów} & 78k & 145k & 267k \\
+    \textbf{liczba tokenów} & 9k & 45k & 85k \\
     \hline
     \end{tabular}
     \caption{Wyniki eksperymentu aplikacji ze złożoną specyfikacją}
@@ -158,7 +158,7 @@ W scenariuszach bez specyfikacji najlepiej sprawdził się pojedynczy agent, kt�
 
 Po wprowadzeniu podstawowej specyfikacji wyraźnie zyskały konfiguracje z wyraźnym podziałem ról. Duet architekt–programista poprawił odwzorowanie wymagań i ergonomię interfejsu, a autonomiczny układ wieloagentowy domknął brakujące funkcje oraz estetykę. Wiązało się to jednak z większym nakładem na synchronizację pracy agentów.
 
-Najbardziej złożona dokumentacja wymagała pełnego zespołu wyspecjalizowanych agentów. Tylko scenariusz wieloagentowy osiągnął pełnię funkcjonalności i zachował spójny interfejs, choć nadal wymagał dodatkowej kontroli jakości, aby ograniczyć błędy integracyjne.
+Najbardziej złożona specyfikacja wymagała pełnego zespołu wyspecjalizowanych agentów. Tylko scenariusz wieloagentowy osiągnął pełnię funkcjonalności i zachował spójny interfejs, choć nadal wymagał dodatkowej kontroli jakości, aby ograniczyć błędy integracyjne.
 
 Zwiększenie liczby agentów i ich specjalizacji przekłada się na wyższą jakość, ale efekty nie rosną liniowo. Każdy dodatkowy agent wymaga skuteczniejszej koordynacji. Bez niej, wzrost złożoności może prowadzić do regresji w jakości końcowego produktu. Mimo tego systemy agentowe mają realny potencjał w automatyzacji generowania aplikacji, szczególnie gdy stosuje się dobrze przemyślaną specyfikację oraz podział ról między agentami.
 

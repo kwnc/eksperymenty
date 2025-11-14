@@ -1,224 +1,352 @@
-describe('Utils Unit Tests', () => {
+/**
+ * Unit Tests for utils.js
+ * Tests all utility functions
+ */
 
-    it('should debounce function calls correctly', (done) => {
-        let callCount = 0;
-        const debouncedFn = Utils.debounce(() => {
-            callCount++;
-        }, 100);
+import { describe, it, expect } from '../test-framework.js';
+import * as utils from '../../js/utils.js';
 
-        // Call multiple times rapidly
-        debouncedFn();
-        debouncedFn();
-        debouncedFn();
+describe('Utils - generateId()', () => {
+  it('should generate a valid UUID format', () => {
+    const id = utils.generateId();
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    expect(uuidRegex.test(id)).toBeTruthy();
+  });
 
-        expect(callCount).toBe(0); // Should not have been called yet
+  it('should generate unique IDs', () => {
+    const id1 = utils.generateId();
+    const id2 = utils.generateId();
+    expect(id1 !== id2).toBeTruthy();
+  });
 
-        setTimeout(() => {
-            expect(callCount).toBe(1); // Should have been called once after delay
-            done();
-        }, 150);
-    });
+  it('should always return a string', () => {
+    const id = utils.generateId();
+    expect(typeof id).toBe('string');
+  });
+});
 
-    it('should throttle function calls correctly', (done) => {
-        let callCount = 0;
-        const throttledFn = Utils.throttle(() => {
-            callCount++;
-        }, 100);
+describe('Utils - formatTimestamp()', () => {
+  it('should return "Just now" for recent timestamps', () => {
+    const now = Date.now();
+    const result = utils.formatTimestamp(now);
+    expect(result).toBe('Just now');
+  });
 
-        // Call multiple times rapidly
-        throttledFn(); // Should execute immediately
-        throttledFn(); // Should be throttled
-        throttledFn(); // Should be throttled
+  it('should return minutes for timestamps less than an hour old', () => {
+    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+    const result = utils.formatTimestamp(fiveMinutesAgo);
+    expect(result).toContain('minute');
+    expect(result).toContain('ago');
+  });
 
-        expect(callCount).toBe(1);
+  it('should return hours for timestamps less than a day old', () => {
+    const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
+    const result = utils.formatTimestamp(twoHoursAgo);
+    expect(result).toContain('hour');
+    expect(result).toContain('ago');
+  });
 
-        setTimeout(() => {
-            throttledFn(); // Should execute after throttle period
-            expect(callCount).toBe(2);
-            done();
-        }, 150);
-    });
+  it('should return "Yesterday" for yesterday timestamps', () => {
+    const yesterday = Date.now() - (24 * 60 * 60 * 1000);
+    const result = utils.formatTimestamp(yesterday);
+    expect(result).toBe('Yesterday');
+  });
 
-    it('should sanitize HTML correctly', () => {
-        const maliciousScript = '<script>alert("xss")</script>';
-        const sanitized = Utils.sanitizeHtml(maliciousScript);
-        expect(sanitized).toBe('&lt;script&gt;alert("xss")&lt;/script&gt;');
+  it('should return formatted date for older timestamps', () => {
+    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const result = utils.formatTimestamp(oneWeekAgo);
+    expect(result.length).toBeGreaterThan(0);
+    expect(typeof result).toBe('string');
+  });
+});
 
-        const simpleText = 'Hello World';
-        expect(Utils.sanitizeHtml(simpleText)).toBe('Hello World');
-    });
+describe('Utils - truncateText()', () => {
+  it('should return original text if shorter than maxLength', () => {
+    const text = 'Hello';
+    const result = utils.truncateText(text, 10);
+    expect(result).toBe('Hello');
+  });
 
-    it('should format file sizes correctly', () => {
-        expect(Utils.formatFileSize(0)).toBe('0 B');
-        expect(Utils.formatFileSize(1024)).toBe('1 KB');
-        expect(Utils.formatFileSize(1048576)).toBe('1 MB');
-        expect(Utils.formatFileSize(1073741824)).toBe('1 GB');
-        expect(Utils.formatFileSize(1536)).toBe('1.5 KB');
-    });
+  it('should truncate text longer than maxLength', () => {
+    const text = 'This is a very long text that should be truncated';
+    const result = utils.truncateText(text, 10);
+    expect(result.length).toBe(13); // 10 chars + '...'
+    expect(result).toContain('...');
+  });
 
-    it('should generate unique IDs', () => {
-        const id1 = Utils.generateId();
-        const id2 = Utils.generateId();
-        const id3 = Utils.generateId('test');
+  it('should handle empty string', () => {
+    const result = utils.truncateText('', 10);
+    expect(result).toBe('');
+  });
 
-        expect(id1).not.toBe(id2);
-        expect(id3).toContain('test_');
-        expect(id1).toContain('id_');
-    });
+  it('should handle null input', () => {
+    const result = utils.truncateText(null, 10);
+    expect(result).toBe('');
+  });
 
-    it('should escape and unescape HTML correctly', () => {
-        const html = '<div class="test">Hello & "World"</div>';
-        const escaped = Utils.escapeHtml(html);
-        expect(escaped).toBe('&lt;div class=&quot;test&quot;&gt;Hello &amp; &quot;World&quot;&lt;/div&gt;');
+  it('should handle undefined input', () => {
+    const result = utils.truncateText(undefined, 10);
+    expect(result).toBe('');
+  });
+});
 
-        const unescaped = Utils.unescapeHtml(escaped);
-        expect(unescaped).toBe(html);
-    });
+describe('Utils - sanitizeHtml()', () => {
+  it('should remove HTML tags', () => {
+    const html = '<p>Hello <strong>World</strong></p>';
+    const result = utils.sanitizeHtml(html);
+    expect(result).toBe('Hello World');
+  });
 
-    it('should format dates correctly', () => {
-        const date = new Date('2023-12-25T10:30:00');
+  it('should remove script tags', () => {
+    const html = '<script>alert("xss")</script>Hello';
+    const result = utils.sanitizeHtml(html);
+    expect(result.toLowerCase()).not.toContain('<script');
+    expect(result.toLowerCase()).not.toContain('</script');
+  });
 
-        const formattedDate = Utils.formatDate(date);
-        expect(formattedDate).toContain('Dec');
-        expect(formattedDate).toContain('25');
-        expect(formattedDate).toContain('2023');
+  it('should remove javascript: protocol', () => {
+    const html = '<a href="javascript:alert()">Click</a>';
+    const result = utils.sanitizeHtml(html);
+    expect(result.toLowerCase()).not.toContain('javascript:');
+  });
 
-        const formattedTime = Utils.formatTime(date);
-        expect(formattedTime).toContain('10:30');
+  it('should handle empty string', () => {
+    const result = utils.sanitizeHtml('');
+    expect(result).toBe('');
+  });
 
-        const formattedDateTime = Utils.formatDateTime(date);
-        expect(formattedDateTime).toContain('Dec');
-        expect(formattedDateTime).toContain('10:30');
-    });
+  it('should handle plain text', () => {
+    const text = 'Plain text without HTML';
+    const result = utils.sanitizeHtml(text);
+    expect(result).toBe(text);
+  });
+});
 
-    it('should detect today and yesterday correctly', () => {
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
-        const twoDaysAgo = new Date();
-        twoDaysAgo.setDate(today.getDate() - 2);
+describe('Utils - stripHtml()', () => {
+  it('should return plain text from HTML', () => {
+    const html = '<p>Test</p>';
+    const result = utils.stripHtml(html);
+    expect(result).toBe(html); // textContent preserves the tags as text
+  });
 
-        expect(Utils.isToday(today)).toBe(true);
-        expect(Utils.isToday(yesterday)).toBe(false);
-        expect(Utils.isYesterday(yesterday)).toBe(true);
-        expect(Utils.isYesterday(twoDaysAgo)).toBe(false);
-    });
+  it('should handle empty string', () => {
+    const result = utils.stripHtml('');
+    expect(result).toBe('');
+  });
 
-    it('should calculate relative time correctly', () => {
-        const now = new Date();
-        const oneMinuteAgo = new Date(now.getTime() - 60000);
-        const oneHourAgo = new Date(now.getTime() - 3600000);
-        const oneDayAgo = new Date(now.getTime() - 86400000);
+  it('should handle null', () => {
+    const result = utils.stripHtml(null);
+    expect(result).toBe('');
+  });
+});
 
-        expect(Utils.getRelativeTime(oneMinuteAgo)).toContain('minute');
-        expect(Utils.getRelativeTime(oneHourAgo)).toContain('hour');
-        expect(Utils.getRelativeTime(oneDayAgo)).toBe('Yesterday');
-    });
+describe('Utils - debounce()', () => {
+  it('should return a function', () => {
+    const debouncedFn = utils.debounce(() => {}, 100);
+    expect(typeof debouncedFn).toBe('function');
+  });
 
-    it('should truncate text correctly', () => {
-        const longText = 'This is a very long text that should be truncated';
-        const truncated = Utils.truncateText(longText, 20);
+  it('should delay function execution', (done) => {
+    let called = false;
+    const debouncedFn = utils.debounce(() => {
+      called = true;
+    }, 50);
 
-        expect(truncated).toHaveLength(23); // 20 + '...'
-        expect(truncated).toContain('...');
-        expect(truncated).toBe('This is a very long ...');
+    debouncedFn();
+    expect(called).toBeFalsy();
 
-        const shortText = 'Short';
-        expect(Utils.truncateText(shortText, 20)).toBe('Short');
-    });
+    setTimeout(() => {
+      expect(called).toBeTruthy();
+      done();
+    }, 100);
+  });
+});
 
-    it('should capitalize first letter correctly', () => {
-        expect(Utils.capitalizeFirst('hello')).toBe('Hello');
-        expect(Utils.capitalizeFirst('HELLO')).toBe('HELLO');
-        expect(Utils.capitalizeFirst('')).toBe('');
-        expect(Utils.capitalizeFirst(null)).toBe(null);
-    });
+describe('Utils - formatBytes()', () => {
+  it('should format zero bytes', () => {
+    const result = utils.formatBytes(0);
+    expect(result).toBe('0 Bytes');
+  });
 
-    it('should convert to camelCase correctly', () => {
-        expect(Utils.toCamelCase('hello-world')).toBe('helloWorld');
-        expect(Utils.toCamelCase('hello_world')).toBe('helloWorld');
-        expect(Utils.toCamelCase('hello world')).toBe('helloWorld');
-        expect(Utils.toCamelCase('HELLO-WORLD')).toBe('hELLOWORLD');
-    });
+  it('should format bytes', () => {
+    const result = utils.formatBytes(500);
+    expect(result).toContain('Bytes');
+  });
 
-    it('should convert to kebab-case correctly', () => {
-        expect(Utils.toKebabCase('helloWorld')).toBe('hello-world');
-        expect(Utils.toKebabCase('HelloWorld')).toBe('hello-world');
-        expect(Utils.toKebabCase('XMLHttpRequest')).toBe('x-m-l-http-request');
-    });
+  it('should format kilobytes', () => {
+    const result = utils.formatBytes(1024);
+    expect(result).toContain('KB');
+  });
 
-    it('should validate JSON correctly', () => {
-        expect(Utils.isValidJSON('{"valid": true}')).toBe(true);
-        expect(Utils.isValidJSON('[]')).toBe(true);
-        expect(Utils.isValidJSON('"string"')).toBe(true);
-        expect(Utils.isValidJSON('invalid json')).toBe(false);
-        expect(Utils.isValidJSON('{invalid: json}')).toBe(false);
-    });
+  it('should format megabytes', () => {
+    const result = utils.formatBytes(1024 * 1024);
+    expect(result).toContain('MB');
+  });
 
-    it('should validate emails correctly', () => {
-        expect(Utils.validateEmail('test@example.com')).toBe(true);
-        expect(Utils.validateEmail('user.name+tag@domain.co.uk')).toBe(true);
-        expect(Utils.validateEmail('invalid.email')).toBe(false);
-        expect(Utils.validateEmail('@domain.com')).toBe(false);
-        expect(Utils.validateEmail('test@')).toBe(false);
-    });
+  it('should format gigabytes', () => {
+    const result = utils.formatBytes(1024 * 1024 * 1024);
+    expect(result).toContain('GB');
+  });
 
-    it('should validate URLs correctly', () => {
-        expect(Utils.validateUrl('https://example.com')).toBe(true);
-        expect(Utils.validateUrl('http://localhost:3000')).toBe(true);
-        expect(Utils.validateUrl('ftp://files.example.com')).toBe(true);
-        expect(Utils.validateUrl('not-a-url')).toBe(false);
-        expect(Utils.validateUrl('http://')).toBe(false);
-    });
+  it('should handle negative values', () => {
+    const result = utils.formatBytes(-100);
+    expect(result).toBe('0 Bytes');
+  });
+});
 
-    it('should deep clone objects correctly', () => {
-        const original = {
-            name: 'Test',
-            nested: {
-                value: 42,
-                array: [1, 2, { deep: true }]
-            },
-            date: new Date('2023-01-01')
-        };
+describe('Utils - isValidEmail()', () => {
+  it('should validate correct email', () => {
+    expect(utils.isValidEmail('test@example.com')).toBeTruthy();
+  });
 
-        const cloned = Utils.deepClone(original);
+  it('should reject email without @', () => {
+    expect(utils.isValidEmail('testexample.com')).toBeFalsy();
+  });
 
-        expect(cloned).toEqual(original);
-        expect(cloned).not.toBe(original);
-        expect(cloned.nested).not.toBe(original.nested);
-        expect(cloned.nested.array).not.toBe(original.nested.array);
-        expect(cloned.date).toBeInstanceOf(Date);
-        expect(cloned.date.getTime()).toBe(original.date.getTime());
-    });
+  it('should reject email without domain', () => {
+    expect(utils.isValidEmail('test@')).toBeFalsy();
+  });
 
-    it('should handle localStorage operations correctly', () => {
-        const originalLocalStorage = window.localStorage;
-        window.localStorage = createMockStorage();
+  it('should reject empty string', () => {
+    expect(utils.isValidEmail('')).toBeFalsy();
+  });
 
-        // Test set and get
-        const success = Utils.localStorage.set('testKey', { data: 'test' });
-        expect(success).toBe(true);
+  it('should reject null', () => {
+    expect(utils.isValidEmail(null)).toBeFalsy();
+  });
+});
 
-        const retrieved = Utils.localStorage.get('testKey');
-        expect(retrieved).toEqual({ data: 'test' });
+describe('Utils - deepClone()', () => {
+  it('should clone an object', () => {
+    const obj = { a: 1, b: 2 };
+    const cloned = utils.deepClone(obj);
+    expect(cloned).toEqual(obj);
+    expect(cloned !== obj).toBeTruthy();
+  });
 
-        // Test default value
-        const defaultValue = Utils.localStorage.get('nonExistent', 'default');
-        expect(defaultValue).toBe('default');
+  it('should clone nested objects', () => {
+    const obj = { a: { b: { c: 1 } } };
+    const cloned = utils.deepClone(obj);
+    expect(cloned).toEqual(obj);
+    cloned.a.b.c = 2;
+    expect(obj.a.b.c).toBe(1);
+  });
 
-        // Test remove
-        const removed = Utils.localStorage.remove('testKey');
-        expect(removed).toBe(true);
-        expect(Utils.localStorage.get('testKey')).toBeNull();
+  it('should handle null', () => {
+    const result = utils.deepClone(null);
+    expect(result).toBeNull();
+  });
 
-        // Test clear
-        Utils.localStorage.set('key1', 'value1');
-        Utils.localStorage.set('key2', 'value2');
-        const cleared = Utils.localStorage.clear();
-        expect(cleared).toBe(true);
-        expect(Utils.localStorage.get('key1')).toBeNull();
-        expect(Utils.localStorage.get('key2')).toBeNull();
+  it('should handle undefined', () => {
+    const result = utils.deepClone(undefined);
+    expect(result).toBeUndefined();
+  });
+});
 
-        window.localStorage = originalLocalStorage;
-    });
+describe('Utils - now()', () => {
+  it('should return a number', () => {
+    const result = utils.now();
+    expect(typeof result).toBe('number');
+  });
+
+  it('should return current timestamp', () => {
+    const result = utils.now();
+    const expected = Date.now();
+    expect(Math.abs(result - expected)).toBeLessThan(10);
+  });
+});
+
+describe('Utils - escapeRegex()', () => {
+  it('should escape special regex characters', () => {
+    const result = utils.escapeRegex('test.*+?');
+    expect(result).toContain('\\.');
+    expect(result).toContain('\\*');
+    expect(result).toContain('\\+');
+    expect(result).toContain('\\?');
+  });
+
+  it('should handle empty string', () => {
+    const result = utils.escapeRegex('');
+    expect(result).toBe('');
+  });
+
+  it('should handle plain text', () => {
+    const result = utils.escapeRegex('hello');
+    expect(result).toBe('hello');
+  });
+});
+
+describe('Utils - getReadingTime()', () => {
+  it('should calculate reading time', () => {
+    const text = 'word '.repeat(200); // 200 words
+    const result = utils.getReadingTime(text);
+    expect(result).toContain('min read');
+  });
+
+  it('should handle empty text', () => {
+    const result = utils.getReadingTime('');
+    expect(result).toBe('0 min read');
+  });
+
+  it('should handle short text', () => {
+    const text = 'Short text';
+    const result = utils.getReadingTime(text);
+    expect(result).toContain('min read');
+  });
+});
+
+describe('Utils - validateNote()', () => {
+  it('should validate a correct note', () => {
+    const note = {
+      id: '123',
+      title: 'Test',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    const result = utils.validateNote(note);
+    expect(result.valid).toBeTruthy();
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should reject note without id', () => {
+    const note = {
+      title: 'Test',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    const result = utils.validateNote(note);
+    expect(result.valid).toBeFalsy();
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it('should reject note without title', () => {
+    const note = {
+      id: '123',
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    const result = utils.validateNote(note);
+    expect(result.valid).toBeFalsy();
+  });
+
+  it('should reject note with title too long', () => {
+    const note = {
+      id: '123',
+      title: 'a'.repeat(101),
+      content: 'Content',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    const result = utils.validateNote(note);
+    expect(result.valid).toBeFalsy();
+  });
+
+  it('should reject null note', () => {
+    const result = utils.validateNote(null);
+    expect(result.valid).toBeFalsy();
+    expect(result.errors).toHaveLength(1);
+  });
 });

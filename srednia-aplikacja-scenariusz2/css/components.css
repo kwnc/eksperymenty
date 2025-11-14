@@ -1,0 +1,188 @@
+/**
+ * Component Styles
+ * Specific component styling for NoteNest application
+ */
+
+/* Note Card Component */
+.note-card {
+    background-color: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+    transition: all var(--transition-fast);
+}
+
+.note-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--primary-orange);
+}
+
+.note-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-sm);
+}
+
+.note-card-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-dark);
+    margin: 0;
+    flex: 1;
+}
+
+.note-card-content {
+    color: var(--text-light);
+    line-height: var(--line-height-relaxed);
+    margin-bottom: var(--space-md);
+}
+
+.note-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.note-card-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.note-card-actions button {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-sm);
+}
+
+/* Tag Components */
+.tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.tag {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-sm);
+    background-color: var(--background-gray);
+    color: var(--text-dark);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 1px solid var(--border-light);
+}
+
+.tag:hover {
+    background-color: var(--border-light);
+    transform: scale(1.05);
+}
+
+.tag.active {
+    background-color: var(--primary-orange);
+    color: var(--white);
+    border-color: var(--primary-orange);
+}
+
+.tag-all {
+    background-color: var(--text-light);
+    color: var(--white);
+    border-color: var(--text-light);
+}
+
+.tag-all.active {
+    background-color: var(--primary-orange);
+    border-color: var(--primary-orange);
+}
+
+/* Notes Container */
+.notes-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* Toast Notification */
+#toast-container {
+    position: fixed;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.toast {
+    min-width: 250px;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    color: var(--white);
+    font-weight: var(--font-weight-medium);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.toast.success {
+    background-color: var(--success-green);
+}
+
+.toast.error {
+    background-color: var(--error-red);
+}
+
+.toast.info {
+    background-color: var(--info-blue);
+}
+
+.toast.warning {
+    background-color: var(--warning-yellow);
+    color: var(--text-dark);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn var(--transition-base);
+}
+
+.fade-out {
+    animation: fadeOut var(--transition-base);
+}
+
+.slide-in {
+    animation: slideIn var(--transition-base);
+}

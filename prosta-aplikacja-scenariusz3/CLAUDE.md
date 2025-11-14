@@ -4,7 +4,7 @@
 
 The multi-agent workflow involves using Claude's user memory feature to establish distinct agent roles and enable them to work together on complex projects. Each agent operates in its own terminal instance with specific responsibilities and clear communication protocols.
 
-## Four Agent System Overview
+## Three Agent System Overview
 
 ### INITIALIZE: Standard Agent Roles
 

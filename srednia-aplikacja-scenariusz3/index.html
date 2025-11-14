@@ -3,89 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="NoteNest - A clean, minimalist local note-taking web application">
-    <meta name="author" content="NoteNest Development Team">
-    <title>NoteNest - Local Note Taking</title>
+    <meta name="description" content="NoteNest - A simple, distraction-free note-taking app">
+    <meta name="author" content="Multi-Agent Development Team">
+    <title>NoteNest - Simple Note Taking</title>
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-    <div class="app-container">
+    <!-- Main Application Container -->
+    <div id="app" class="app-container">
+
+        <!-- Header -->
         <header class="app-header">
             <h1 class="app-title">NoteNest</h1>
-            <button id="new-note-btn" class="btn btn-primary">+ New Note</button>
+            <div class="header-actions">
+                <button id="new-note-btn" class="btn btn-primary">+ New Note</button>
+            </div>
         </header>
 
-        <main class="app-main">
+        <!-- Main Content Area -->
+        <div class="main-content">
+
+            <!-- Sidebar -->
             <aside class="sidebar">
-                <div class="search-section">
-                    <input type="text" id="search-input" class="search-input" placeholder="Search notes...">
-                </div>
+                <nav class="sidebar-nav">
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <button id="all-notes-btn" class="nav-link active">
+                                All Notes
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
 
-                <div class="filter-section">
-                    <h3>Filter by Tags</h3>
-                    <div id="tag-filters" class="tag-filters">
-                        <!-- Tag filters will be dynamically generated -->
+                <!-- Tags Section -->
+                <div class="tags-section">
+                    <h3 class="tags-title">Tags</h3>
+                    <div id="tag-cloud" class="tag-cloud">
+                        <!-- Tags will be dynamically rendered here -->
                     </div>
-                    <button id="clear-filters-btn" class="btn btn-secondary">Clear Filters</button>
-                </div>
-
-                <div class="stats-section">
-                    <p id="note-count" class="note-count">0 notes</p>
                 </div>
             </aside>
 
-            <section class="content-area">
-                <div id="notes-list" class="notes-list">
-                    <!-- Notes will be dynamically generated -->
-                </div>
+            <!-- Content Area -->
+            <main class="content-area">
 
-                <div id="empty-state" class="empty-state">
-                    <h2>Welcome to NoteNest</h2>
-                    <p>Create your first note to get started!</p>
-                    <button class="btn btn-primary">+ Create Note</button>
-                </div>
-            </section>
-        </main>
+                <!-- Notes List View -->
+                <section id="notes-list-view" class="notes-list-view">
+                    <div class="view-header">
+                        <h2 id="view-title" class="view-title">All Notes</h2>
+                        <div class="view-actions">
+                            <input
+                                type="search"
+                                id="search-input"
+                                class="search-input"
+                                placeholder="Search notes..."
+                                aria-label="Search notes">
+                        </div>
+                    </div>
 
-        <!-- Note Editor Modal -->
-        <div id="note-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="modal-title">New Note</h2>
-                    <button id="close-modal-btn" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="note-form">
+                    <div id="notes-list" class="notes-list">
+                        <!-- Notes will be dynamically rendered here -->
+                        <div class="empty-state">
+                            <p>No notes yet. Click "New Note" to get started!</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Note Editor View -->
+                <section id="note-editor-view" class="note-editor-view" style="display: none;">
+                    <div class="editor-header">
+                        <button id="back-to-list-btn" class="btn btn-secondary">← Back to Notes</button>
+                        <div class="editor-actions">
+                            <button id="save-note-btn" class="btn btn-primary">Save</button>
+                            <button id="delete-note-btn" class="btn btn-danger">Delete</button>
+                        </div>
+                    </div>
+
+                    <form id="note-form" class="note-form">
                         <div class="form-group">
-                            <label for="note-title">Title</label>
-                            <input type="text" id="note-title" class="form-input" placeholder="Enter note title..." required>
+                            <input
+                                type="text"
+                                id="note-title"
+                                class="form-input note-title-input"
+                                placeholder="Note title..."
+                                required
+                                aria-label="Note title">
                         </div>
 
                         <div class="form-group">
-                            <label for="note-content">Content</label>
-                            <textarea id="note-content" class="form-textarea" placeholder="Write your note here..." rows="12" required></textarea>
+                            <textarea
+                                id="note-content"
+                                class="form-input note-content-input"
+                                placeholder="Start typing your note..."
+                                rows="15"
+                                aria-label="Note content"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="note-tags">Tags</label>
-                            <input type="text" id="note-tags" class="form-input" placeholder="Enter tags separated by commas...">
-                            <small class="form-help">Separate tags with commas (e.g., work, important, ideas)</small>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" id="cancel-btn" class="btn btn-secondary">Cancel</button>
-                            <button type="submit" id="save-btn" class="btn btn-primary">Save Note</button>
+                            <label for="note-tags" class="form-label">Tags (comma-separated)</label>
+                            <input
+                                type="text"
+                                id="note-tags"
+                                class="form-input note-tags-input"
+                                placeholder="e.g. work, ideas, todo"
+                                aria-label="Note tags">
+                            <small class="form-help">Add tags separated by commas</small>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
 
-        <!-- Toast Notifications -->
-        <div id="toast-container" class="toast-container"></div>
+                    <!-- Note Metadata -->
+                    <div id="note-metadata" class="note-metadata">
+                        <small class="metadata-text">
+                            <span id="created-date">Created: --</span> |
+                            <span id="updated-date">Last updated: --</span>
+                        </small>
+                    </div>
+                </section>
+
+            </main>
+        </div>
     </div>
 
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true">
+        <!-- Toast notifications will be dynamically added here -->
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h2 id="modal-title" class="modal-title">Delete Note?</h2>
+            <p class="modal-message">Are you sure you want to delete this note? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button id="cancel-delete-btn" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-delete-btn" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="js/utils.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/notes.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
 </body>

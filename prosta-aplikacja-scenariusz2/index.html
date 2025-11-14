@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleNote Local - Your Private Notes</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>📝 SimpleNote Local</h1>
+            <p class="tagline">Your notes, stored locally, completely private</p>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search notes by title or content..."
+                class="search-input"
+            >
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Sidebar: Note List -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>My Notes</h2>
+                    <button id="newNoteBtn" class="btn btn-primary">+ New Note</button>
+                </div>
+                <div id="noteList" class="note-list">
+                    <!-- Note items will be rendered here -->
+                </div>
+            </aside>
+
+            <!-- Editor: Note Content -->
+            <main class="editor-container">
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-state-content">
+                        <h2>Welcome to SimpleNote Local</h2>
+                        <p>Create your first note to get started</p>
+                        <button id="emptyNewNoteBtn" class="btn btn-primary">Create First Note</button>
+                    </div>
+                </div>
+
+                <div id="editorArea" class="editor-area" style="display: none;">
+                    <input
+                        type="text"
+                        id="noteTitle"
+                        placeholder="Note title..."
+                        class="note-title-input"
+                    >
+                    <textarea
+                        id="noteContent"
+                        placeholder="Start writing your note..."
+                        class="note-content-input"
+                    ></textarea>
+                    <div class="editor-footer">
+                        <span id="noteMetadata" class="note-metadata"></span>
+                        <div class="editor-actions">
+                            <button id="deleteNoteBtn" class="btn btn-danger">Delete</button>
+                            <button id="saveNoteBtn" class="btn btn-success">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Message/Notification Area -->
+        <div id="messageContainer" class="message-container"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

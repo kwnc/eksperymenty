@@ -1,168 +1,145 @@
 /**
- * Storage Module - Handles all localStorage operations for NoteNest
- *
- * Provides a clean API for managing notes and tags in browser localStorage.
- * Includes error handling, data validation, and automatic cleanup.
- *
- * @module Storage
- * @version 1.0.0
+ * storage.js - Data Persistence Layer
+ * Handle all localStorage operations with error handling and data validation
  */
-const Storage = {
-    NOTES_KEY: 'notenest_notes',
-    TAGS_KEY: 'notenest_tags',
 
-    init() {
-        this.ensureStorageExists();
-    },
-
-    ensureStorageExists() {
-        if (!localStorage.getItem(this.NOTES_KEY)) {
-            localStorage.setItem(this.NOTES_KEY, JSON.stringify([]));
-        }
-        if (!localStorage.getItem(this.TAGS_KEY)) {
-            localStorage.setItem(this.TAGS_KEY, JSON.stringify([]));
-        }
-    },
-
-    generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    },
-
-    loadNotes() {
-        try {
-            const notes = JSON.parse(localStorage.getItem(this.NOTES_KEY) || '[]');
-            return notes.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-        } catch (error) {
-            console.error('Error loading notes:', error);
-            return [];
-        }
-    },
-
-    saveNote(noteData) {
-        try {
-            const notes = this.loadNotes();
-            const note = {
-                id: this.generateId(),
-                title: noteData.title,
-                content: noteData.content,
-                tags: noteData.tags || [],
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-
-            notes.unshift(note);
-            localStorage.setItem(this.NOTES_KEY, JSON.stringify(notes));
-            this.updateTagsList(noteData.tags);
-            return note;
-        } catch (error) {
-            console.error('Error saving note:', error);
-            throw error;
-        }
-    },
-
-    updateNote(id, noteData) {
-        try {
-            const notes = this.loadNotes();
-            const noteIndex = notes.findIndex(note => note.id === id);
-
-            if (noteIndex === -1) {
-                throw new Error('Note not found');
-            }
-
-            notes[noteIndex] = {
-                ...notes[noteIndex],
-                title: noteData.title,
-                content: noteData.content,
-                tags: noteData.tags || [],
-                updatedAt: new Date().toISOString()
-            };
-
-            localStorage.setItem(this.NOTES_KEY, JSON.stringify(notes));
-            this.updateTagsList(noteData.tags);
-            return notes[noteIndex];
-        } catch (error) {
-            console.error('Error updating note:', error);
-            throw error;
-        }
-    },
-
-    deleteNote(id) {
-        try {
-            const notes = this.loadNotes();
-            const filteredNotes = notes.filter(note => note.id !== id);
-            localStorage.setItem(this.NOTES_KEY, JSON.stringify(filteredNotes));
-            this.cleanupUnusedTags();
-            return true;
-        } catch (error) {
-            console.error('Error deleting note:', error);
-            return false;
-        }
-    },
-
-    loadTags() {
-        try {
-            return JSON.parse(localStorage.getItem(this.TAGS_KEY) || '[]');
-        } catch (error) {
-            console.error('Error loading tags:', error);
-            return [];
-        }
-    },
-
-    updateTagsList(newTags) {
-        if (!newTags || newTags.length === 0) return;
-
-        try {
-            const existingTags = this.loadTags();
-            const allTags = [...new Set([...existingTags, ...newTags])];
-            localStorage.setItem(this.TAGS_KEY, JSON.stringify(allTags));
-        } catch (error) {
-            console.error('Error updating tags:', error);
-        }
-    },
-
-    cleanupUnusedTags() {
-        try {
-            const notes = this.loadNotes();
-            const usedTags = new Set();
-
-            notes.forEach(note => {
-                note.tags.forEach(tag => usedTags.add(tag));
-            });
-
-            localStorage.setItem(this.TAGS_KEY, JSON.stringify([...usedTags]));
-        } catch (error) {
-            console.error('Error cleaning up tags:', error);
-        }
-    },
-
-    searchNotes(query) {
-        const notes = this.loadNotes();
-        const lowerQuery = query.toLowerCase();
-
-        return notes.filter(note =>
-            note.title.toLowerCase().includes(lowerQuery) ||
-            note.content.toLowerCase().includes(lowerQuery) ||
-            note.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
-        );
-    },
-
-    filterNotesByTags(selectedTags) {
-        const notes = this.loadNotes();
-
-        if (!selectedTags || selectedTags.length === 0) {
-            return notes;
-        }
-
-        return notes.filter(note =>
-            selectedTags.every(tag => note.tags.includes(tag))
-        );
-    },
-
-    clearAllData() {
-        localStorage.removeItem(this.NOTES_KEY);
-        localStorage.removeItem(this.TAGS_KEY);
-        this.ensureStorageExists();
-    }
+// localStorage Keys
+const STORAGE_KEYS = {
+  NOTES: 'noteNest_notes',           // Array of Note objects
+  SETTINGS: 'noteNest_settings',     // AppSettings object
+  VERSION: 'noteNest_version'        // Schema version for migrations
 };
 
-Storage.init();
+/**
+ * Load all notes from localStorage
+ * @returns {Note[]} Array of note objects
+ */
+function loadNotes() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.NOTES);
+    if (!data) return [];
+    const notes = JSON.parse(data);
+    return Array.isArray(notes) ? notes : [];
+  } catch (error) {
+    console.error('Error loading notes:', error);
+    return [];
+  }
+}
+
+/**
+ * Save notes array to localStorage
+ * @param {Note[]} notes - Array of note objects
+ * @returns {boolean} True if successful
+ */
+function saveNotes(notes) {
+  try {
+    if (!Array.isArray(notes)) {
+      throw new Error('Notes must be an array');
+    }
+    const data = JSON.stringify(notes);
+    localStorage.setItem(STORAGE_KEYS.NOTES, data);
+    return true;
+  } catch (error) {
+    console.error('Error saving notes:', error);
+    if (error.name === 'QuotaExceededError') {
+      alert('Storage quota exceeded. Please delete some notes.');
+    }
+    return false;
+  }
+}
+
+/**
+ * Load application settings
+ * @returns {AppSettings} Settings object
+ */
+function loadSettings() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+    if (!data) return getDefaultSettings();
+    return { ...getDefaultSettings(), ...JSON.parse(data) };
+  } catch (error) {
+    console.error('Error loading settings:', error);
+    return getDefaultSettings();
+  }
+}
+
+/**
+ * Save application settings
+ * @param {AppSettings} settings - Settings object
+ * @returns {boolean} True if successful
+ */
+function saveSettings(settings) {
+  try {
+    const data = JSON.stringify(settings);
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, data);
+    return true;
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    return false;
+  }
+}
+
+/**
+ * Get default settings
+ * @returns {AppSettings} Default settings object
+ */
+function getDefaultSettings() {
+  return {
+    lastActiveNote: null,
+    viewMode: 'all',
+    activeFilter: null,
+    sortBy: 'updatedAt',
+    sortDesc: true
+  };
+}
+
+/**
+ * Clear all application data
+ * @returns {boolean} True if successful
+ */
+function clearAllData() {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.NOTES);
+    localStorage.removeItem(STORAGE_KEYS.SETTINGS);
+    return true;
+  } catch (error) {
+    console.error('Error clearing data:', error);
+    return false;
+  }
+}
+
+/**
+ * Check localStorage availability
+ * @returns {boolean} True if available
+ */
+function isStorageAvailable() {
+  try {
+    const test = '__storage_test__';
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Get storage usage information
+ * @returns {Object} Storage usage stats
+ */
+function getStorageInfo() {
+  try {
+    const notes = localStorage.getItem(STORAGE_KEYS.NOTES) || '';
+    const settings = localStorage.getItem(STORAGE_KEYS.SETTINGS) || '';
+    const totalSize = notes.length + settings.length;
+    const estimatedLimit = 5 * 1024 * 1024; // 5MB estimate
+
+    return {
+      used: totalSize,
+      limit: estimatedLimit,
+      percentage: (totalSize / estimatedLimit * 100).toFixed(2)
+    };
+  } catch (error) {
+    return { used: 0, limit: 0, percentage: 0 };
+  }
+}

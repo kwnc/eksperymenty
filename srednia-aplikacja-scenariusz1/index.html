@@ -3,50 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoteNest - Quick Note Taking</title>
+    <title>NoteNest - Simple Note Taking</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>NoteNest</h1>
-            <p>Your quick, distraction-free note taking space</p>
+            <p class="subtitle">Your simple note-taking companion</p>
         </header>
 
+        <div class="tag-filter">
+            <label for="tag-filter-select">Filter by tag:</label>
+            <select id="tag-filter-select">
+                <option value="all">All Notes</option>
+            </select>
+        </div>
+
         <main>
-            <section class="note-form">
-                <div class="form-group">
-                    <input type="text" id="noteTitle" placeholder="Note title..." class="title-input">
+            <section class="note-editor">
+                <h2 id="editor-title">Create New Note</h2>
+                <input type="text" id="note-title" placeholder="Note title..." />
+                <textarea id="note-content" placeholder="Start typing your note..."></textarea>
+
+                <div class="tags-input-container">
+                    <input type="text" id="note-tags" placeholder="Add tags (comma-separated)..." />
+                    <small>Example: work, ideas, personal</small>
                 </div>
-                <div class="form-group">
-                    <textarea id="noteContent" placeholder="Start typing your note..." class="content-input"></textarea>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="noteTags" placeholder="Add tags (separated by commas)..." class="tags-input">
-                </div>
-                <div class="form-actions">
-                    <button id="saveNote" class="btn-primary">Save Note</button>
-                    <button id="clearNote" class="btn-secondary">Clear</button>
+
+                <div class="button-group">
+                    <button id="save-note-btn" class="btn-primary">Save Note</button>
+                    <button id="cancel-edit-btn" class="btn-secondary" style="display: none;">Cancel</button>
                 </div>
             </section>
 
-            <section class="notes-filter">
-                <div class="filter-group">
-                    <input type="text" id="tagFilter" placeholder="Filter by tag..." class="filter-input">
-                    <button id="clearFilter" class="btn-filter">Clear Filter</button>
-                </div>
-                <div id="tagsList" class="tags-list"></div>
-            </section>
-
-            <section id="notesList" class="notes-list">
-                <div class="empty-state">
-                    <p>No notes yet. Create your first note above!</p>
+            <section class="notes-list">
+                <h2>Your Notes</h2>
+                <div id="notes-container">
+                    <p class="empty-state">No notes yet. Create your first note above!</p>
                 </div>
             </section>
         </main>
     </div>
 
-    <div id="toast" class="toast hidden"></div>
+    <div id="toast" class="toast"></div>
 
     <script src="script.js"></script>
 </body>

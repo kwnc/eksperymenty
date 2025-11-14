@@ -1,275 +1,264 @@
-const Utils = {
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
+/**
+ * Utility Functions
+ * Reusable helper functions for the application
+ *
+ * @module utils
+ */
 
-    throttle(func, limit) {
-        let inThrottle;
-        return function executedFunction(...args) {
-            if (!inThrottle) {
-                func.apply(this, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        };
-    },
+/**
+ * Generate a unique ID (UUID v4)
+ * @returns {string} UUID string
+ */
+export function generateId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
 
-    sanitizeHtml(html) {
-        const temp = document.createElement('div');
-        temp.textContent = html;
-        return temp.innerHTML;
-    },
+  // Fallback implementation for older browsers
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
-    formatFileSize(bytes) {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    },
+/**
+ * Format a timestamp into a human-readable string
+ * @param {number} timestamp - Unix timestamp in milliseconds
+ * @returns {string} Formatted date string
+ * @example
+ * formatTimestamp(Date.now()) // "Just now"
+ * formatTimestamp(Date.now() - 60000) // "1 minute ago"
+ * formatTimestamp(Date.now() - 86400000) // "Yesterday"
+ * formatTimestamp(Date.now() - 172800000) // "Nov 11, 2025"
+ */
+export function formatTimestamp(timestamp) {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
 
-    generateId(prefix = 'id') {
-        return prefix + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    },
+  // Less than 1 minute
+  if (seconds < 60) {
+    return 'Just now';
+  }
 
-    copyToClipboard(text) {
-        if (navigator.clipboard && window.isSecureContext) {
-            return navigator.clipboard.writeText(text);
-        } else {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            textArea.style.top = '-999999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
+  // Less than 60 minutes
+  if (minutes < 60) {
+    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  }
 
-            return new Promise((resolve, reject) => {
-                try {
-                    document.execCommand('copy');
-                    textArea.remove();
-                    resolve();
-                } catch (error) {
-                    textArea.remove();
-                    reject(error);
-                }
-            });
-        }
-    },
+  // Less than 24 hours
+  if (hours < 24) {
+    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  }
 
-    downloadFile(content, filename, contentType = 'application/json') {
-        const blob = new Blob([content], { type: contentType });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    },
+  const date = new Date(timestamp);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
 
-    readFileAsText(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = (e) => reject(e);
-            reader.readAsText(file);
-        });
-    },
+  // Yesterday
+  if (days === 1 || (date.toDateString() === yesterday.toDateString())) {
+    return 'Yesterday';
+  }
 
-    validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    },
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = months[date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
 
-    validateUrl(url) {
-        try {
-            new URL(url);
-            return true;
-        } catch {
-            return false;
-        }
-    },
+  // Within current year
+  if (year === today.getFullYear()) {
+    return `${month} ${day}`;
+  }
 
-    escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, (m) => map[m]);
-    },
+  // Older
+  return `${month} ${day}, ${year}`;
+}
 
-    unescapeHtml(html) {
-        const map = {
-            '&amp;': '&',
-            '&lt;': '<',
-            '&gt;': '>',
-            '&quot;': '"',
-            '&#039;': "'"
-        };
-        return html.replace(/&(amp|lt|gt|quot|#039);/g, (m) => map[m]);
-    },
+/**
+ * Truncate text to a maximum length
+ * @param {string} text - Text to truncate
+ * @param {number} maxLength - Maximum length
+ * @returns {string} Truncated text with ellipsis if needed
+ */
+export function truncateText(text, maxLength) {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+}
 
-    formatDate(date, options = {}) {
-        const defaultOptions = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        };
-        return new Date(date).toLocaleDateString(undefined, { ...defaultOptions, ...options });
-    },
+/**
+ * Sanitize HTML to prevent XSS attacks
+ * @param {string} html - HTML string to sanitize
+ * @returns {string} Sanitized string
+ */
+export function sanitizeHtml(html) {
+  if (!html) return '';
+  // Remove all HTML tags and script content
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '');
+}
 
-    formatTime(date, options = {}) {
-        const defaultOptions = {
-            hour: '2-digit',
-            minute: '2-digit'
-        };
-        return new Date(date).toLocaleTimeString(undefined, { ...defaultOptions, ...options });
-    },
+/**
+ * Strip HTML tags from string
+ * @param {string} html - HTML string
+ * @returns {string} Plain text
+ */
+export function stripHtml(html) {
+  if (!html) return '';
+  const tmp = document.createElement('div');
+  tmp.textContent = html; // Use textContent to avoid XSS
+  return tmp.textContent || tmp.innerText || '';
+}
 
-    formatDateTime(date) {
-        return `${this.formatDate(date)} ${this.formatTime(date)}`;
-    },
+/**
+ * Debounce a function call
+ * @param {Function} func - Function to debounce
+ * @param {number} delay - Delay in milliseconds
+ * @returns {Function} Debounced function
+ */
+export function debounce(func, delay) {
+  let timeoutId;
+  return function(...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+}
 
-    isToday(date) {
-        const today = new Date();
-        const checkDate = new Date(date);
-        return today.toDateString() === checkDate.toDateString();
-    },
+/**
+ * Format bytes into human-readable string
+ * @param {number} bytes - Number of bytes
+ * @returns {string} Formatted string (e.g., "1.5 MB", "500 KB")
+ */
+export function formatBytes(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  if (!bytes || bytes < 0) return '0 Bytes';
 
-    isYesterday(date) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const checkDate = new Date(date);
-        return yesterday.toDateString() === checkDate.toDateString();
-    },
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    getRelativeTime(date) {
-        const now = new Date();
-        const past = new Date(date);
-        const diffTime = Math.abs(now - past);
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-        const diffMinutes = Math.floor(diffTime / (1000 * 60));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+}
 
-        if (diffMinutes < 1) {
-            return 'Just now';
-        } else if (diffMinutes < 60) {
-            return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
-        } else if (diffHours < 24) {
-            return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-        } else if (diffDays === 1) {
-            return 'Yesterday';
-        } else if (diffDays < 7) {
-            return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-        } else if (diffDays < 30) {
-            const weeks = Math.floor(diffDays / 7);
-            return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
-        } else if (diffDays < 365) {
-            const months = Math.floor(diffDays / 30);
-            return `${months} month${months > 1 ? 's' : ''} ago`;
-        } else {
-            const years = Math.floor(diffDays / 365);
-            return `${years} year${years > 1 ? 's' : ''} ago`;
-        }
-    },
+/**
+ * Validate email format (for future use)
+ * @param {string} email - Email address to validate
+ * @returns {boolean} True if valid email format
+ */
+export function isValidEmail(email) {
+  if (!email) return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
 
-    truncateText(text, maxLength, ellipsis = '...') {
-        if (text.length <= maxLength) return text;
-        return text.slice(0, maxLength) + ellipsis;
-    },
+/**
+ * Deep clone an object
+ * @param {Object} obj - Object to clone
+ * @returns {Object} Cloned object
+ */
+export function deepClone(obj) {
+  if (!obj) return obj;
 
-    capitalizeFirst(str) {
-        if (!str) return str;
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    },
+  // Use structuredClone if available (modern browsers)
+  if (typeof structuredClone !== 'undefined') {
+    return structuredClone(obj);
+  }
 
-    toCamelCase(str) {
-        return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '');
-    },
+  // Fallback to JSON method
+  try {
+    return JSON.parse(JSON.stringify(obj));
+  } catch (error) {
+    console.error('Error cloning object:', error);
+    return obj;
+  }
+}
 
-    toKebabCase(str) {
-        return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-    },
+/**
+ * Get current timestamp
+ * @returns {number} Current timestamp in milliseconds
+ */
+export function now() {
+  // TODO: Implement by Agent 2
+  return Date.now();
+}
 
-    isValidJSON(str) {
-        try {
-            JSON.parse(str);
-            return true;
-        } catch {
-            return false;
-        }
-    },
+/**
+ * Escape special characters for use in regex
+ * @param {string} string - String to escape
+ * @returns {string} Escaped string
+ */
+export function escapeRegex(string) {
+  if (!string) return '';
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
-    deepClone(obj) {
-        if (obj === null || typeof obj !== 'object') return obj;
-        if (obj instanceof Date) return new Date(obj.getTime());
-        if (obj instanceof Array) return obj.map(item => this.deepClone(item));
-        if (typeof obj === 'object') {
-            const clonedObj = {};
-            for (const key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    clonedObj[key] = this.deepClone(obj[key]);
-                }
-            }
-            return clonedObj;
-        }
-    },
+/**
+ * Calculate reading time estimate
+ * @param {string} text - Text to analyze
+ * @returns {string} Reading time estimate (e.g., "2 min read")
+ */
+export function getReadingTime(text) {
+  if (!text) return '0 min read';
 
-    localStorage: {
-        set(key, value) {
-            try {
-                localStorage.setItem(key, JSON.stringify(value));
-                return true;
-            } catch (error) {
-                console.error('Error saving to localStorage:', error);
-                return false;
-            }
-        },
+  const wordsPerMinute = 200;
+  const words = text.trim().split(/\s+/).length;
+  const minutes = Math.ceil(words / wordsPerMinute);
 
-        get(key, defaultValue = null) {
-            try {
-                const item = localStorage.getItem(key);
-                return item ? JSON.parse(item) : defaultValue;
-            } catch (error) {
-                console.error('Error reading from localStorage:', error);
-                return defaultValue;
-            }
-        },
+  return `${minutes} min read`;
+}
 
-        remove(key) {
-            try {
-                localStorage.removeItem(key);
-                return true;
-            } catch (error) {
-                console.error('Error removing from localStorage:', error);
-                return false;
-            }
-        },
+/**
+ * Validate note object structure
+ * @param {Object} note - Note to validate
+ * @returns {Object} { valid: boolean, errors: string[] }
+ */
+export function validateNote(note) {
+  const errors = [];
 
-        clear() {
-            try {
-                localStorage.clear();
-                return true;
-            } catch (error) {
-                console.error('Error clearing localStorage:', error);
-                return false;
-            }
-        }
-    }
-};
+  if (!note) {
+    return { valid: false, errors: ['Note object is required'] };
+  }
 
-window.Utils = Utils;
+  if (!note.id || typeof note.id !== 'string') {
+    errors.push('Note must have a valid id');
+  }
+
+  if (note.title === undefined || note.title === null) {
+    errors.push('Note must have a title');
+  }
+
+  if (typeof note.title === 'string' && note.title.length > 100) {
+    errors.push('Title must be 100 characters or less');
+  }
+
+  if (note.content === undefined || note.content === null) {
+    errors.push('Note must have content');
+  }
+
+  if (typeof note.content === 'string' && note.content.length > 100000) {
+    errors.push('Content must be 100,000 characters or less');
+  }
+
+  if (!note.createdAt || typeof note.createdAt !== 'number') {
+    errors.push('Note must have a valid createdAt timestamp');
+  }
+
+  if (!note.updatedAt || typeof note.updatedAt !== 'number') {
+    errors.push('Note must have a valid updatedAt timestamp');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}

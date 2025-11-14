@@ -1,0 +1,237 @@
+/**
+ * Main Stylesheet
+ * Global styles and layout for NoteNest application
+ *
+ * Import order: variables.css -> styles.css -> components.css
+ */
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    color: var(--text-dark);
+    background-color: var(--background-gray);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Hierarchy */
+h1 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--text-dark);
+    margin-bottom: var(--space-sm);
+}
+
+h2 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    color: var(--text-dark);
+    margin-bottom: var(--space-md);
+}
+
+h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-normal);
+    color: var(--text-dark);
+    margin-bottom: var(--space-sm);
+}
+
+p {
+    margin-bottom: var(--space-md);
+}
+
+/* Link Styles */
+a {
+    color: var(--primary-orange);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--primary-orange-hover);
+    text-decoration: underline;
+}
+
+/* Focus States */
+*:focus {
+    outline: 2px solid var(--primary-orange);
+    outline-offset: 2px;
+}
+
+/* Layout Container */
+#app {
+    max-width: var(--max-width-md);
+    margin: 0 auto;
+    padding: var(--space-lg);
+    min-height: 100vh;
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+    padding: var(--space-lg) 0;
+}
+
+header h1 {
+    color: var(--primary-orange);
+    margin-bottom: var(--space-xs);
+}
+
+header .tagline {
+    color: var(--text-light);
+    font-size: var(--font-size-base);
+    margin-bottom: 0;
+}
+
+/* Main Content */
+main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+/* Card Component Base */
+.card {
+    background-color: var(--white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: var(--space-md);
+}
+
+.form-group label {
+    display: block;
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--space-sm);
+    color: var(--text-dark);
+    font-size: var(--font-size-sm);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    color: var(--text-dark);
+    transition: border-color var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--primary-orange);
+    outline: none;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+/* Button Styles */
+.btn {
+    padding: var(--space-sm) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-block;
+}
+
+.btn-primary {
+    background-color: var(--primary-orange);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-orange-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background-color: var(--white);
+    color: var(--text-dark);
+    border: 2px solid var(--border-gray);
+}
+
+.btn-secondary:hover {
+    background-color: var(--background-gray);
+    border-color: var(--text-light);
+}
+
+.btn-secondary:active {
+    background-color: var(--border-light);
+}
+
+/* Utility Classes */
+.empty-state {
+    text-align: center;
+    color: var(--text-light);
+    font-style: italic;
+    padding: var(--space-xl);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #app {
+        padding: var(--space-md);
+    }
+
+    header {
+        margin-bottom: var(--space-xl);
+        padding: var(--space-md) 0;
+    }
+
+    header h1 {
+        font-size: var(--font-size-xl);
+    }
+
+    .card {
+        padding: var(--space-md);
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
