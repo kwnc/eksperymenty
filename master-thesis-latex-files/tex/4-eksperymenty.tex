@@ -40,6 +40,8 @@ W wyniku scenariusza powstała aplikacja przypominająca scenariusz 1, z tą ró
 \subsubsection*{Wyniki}
 Wyniki wskazują, że dla prostego celu (notatnik bez szczegółowej specyfikacji) najlepszy kompromis jakości i kosztu osiąga konfiguracja z jednym agentem: najwyższa ocena funkcjonalności i stabilności (brak błędów) przy akceptowalnej estetyce i prostym, czytelnym interfejsie. Układ architekt–programista poszerza zakres rozwiązania, lecz obniża jakość interfejsu i estetyki, mimo zachowania stabilności. Należy podkreślić, że żaden scenariusz nie wygenerował błędów, które przeszkodziłyby aplikacji w jej funkcjonowaniu.
 
+Analiza czasu generowania oraz zużycia tokenów potwierdza przewagę pojedynczego agenta w prostych zadaniach. Scenariusz 1 ukończył pracę w 3 minuty przy zużyciu 6k tokenów, podczas gdy scenariusz 3 wymagał 24 minut i 95k tokenów — ośmiokrotnie dłużej i prawie szesnastokrotnie więcej zasobów obliczeniowych. Scenariusz 2 zajął pozycję pośrednią (9 minut, 31k tokenów). Wzrost kosztu obliczeniowego w konfiguracjach wieloagentowych wynika z komunikacji między agentami oraz wielokrotnego przetwarzania kontekstu, co przy prostych zadaniach nie przekłada się na proporcjonalny wzrost jakości.
+
 W konsekwencji, dla zadań o niskiej złożoności zaleca się użycie pojedynczego agenta. Konfiguracje wieloagentowe mają uzasadnienie dopiero przy bogatszych wymaganiach wejściowych oraz jasno zdefiniowanych rolach.
 
 \begin{table}[h!]
@@ -84,7 +86,9 @@ System agentowy z wyraźnym podziałem ról lepiej radzi sobie z przetwarzaniem 
 \subsubsection*{Wyniki}
 Dostarczona specyfikacja wyraźnie poprawia jakość rezultatów względem prostego zapytania. Pojedynczy agent zapewnia wysoką stabilność i zgodność ze standardami, lecz nie domyka funkcjonalności i oferuje skromny interfejs. Układ architekt–programista poprawia jakość UI i odwzorowanie wymagań.
 
-Najlepsze wyniki uzyskano w autonomicznym układzie wieloagentowym — pełna funkcjonalność oraz dopracowany interfejs. Przy specyfikacji o takiej szczegółowości korzyści z podziału ról i współpracy agentów przeważają koszty koordynacji. Wywnioskowano, że dla zadań opartych na podstawowej specyfikacji wieloagentowy system z jasnymi rolami jest najwydajniejszy. Gdy zasoby lub orkiestracja są ograniczone, kompromisem jest duet architekt–programista; pojedynczy agent pozostaje opcją do szybkich prototypów.
+Najlepsze wyniki uzyskano w autonomicznym układzie wieloagentowym — pełna funkcjonalność oraz dopracowany interfejs. Przy specyfikacji o takiej szczegółowości korzyści z podziału ról i współpracy agentów przeważają koszty koordynacji. Analiza efektywności czasowej pokazuje, że scenariusz 1 wykonał zadanie w 2 minuty przy 8k tokenów, scenariusz 2 potrzebował 10 minut i 41k tokenów, natomiast scenariusz 3 wymagał 25 minut oraz 84k tokenów. Mimo że system wieloagentowy zużył ponad dziesięciokrotnie więcej tokenów niż pojedynczy agent, przyrost jakości w kategoriach funkcjonalności i estetyki uzasadnia ten koszt przy zadaniach ze specyfikacją.
+
+Wywnioskowano, że dla zadań opartych na podstawowej specyfikacji wieloagentowy system z jasnymi rolami jest najwydajniejszy. Gdy zasoby lub orkiestracja są ograniczone, kompromisem jest duet architekt–programista; pojedynczy agent pozostaje opcją do szybkich prototypów.
 
 \begin{table}[h!]
     \centering
@@ -128,6 +132,8 @@ Rezultatem był projekt aplikacji, który w największym stopniu odpowiadał za�
 \subsubsection*{Wyniki}
 Wyniki zestawione w tabeli \ref{table:eksperyment-z-zaawansowana-specyfikacja-aplikacji} przedstawiają obserwacje jakościowe z poprzednich podrozdziałów. Scenariusz z pojedynczym agentem (S1) uzyskał najniższe noty w większości kategorii, gdyż pominął zaawansowane funkcje, jak i podczas pierwszej próby zawierał błędy, które powstrzymywały go od działania. Dwóch agentów (S2) pozwoliło na znaczące zwiększenie pokrycia wymagań oraz poprawę ergonomii interfejsu, choć utrzymała się umiarkowana liczba błędów w pierwszej wygenerowanej aplikacji. Najwyższy wynik osiągnął system wieloagentowy (S3), który zrealizował pełen zakres funkcji i zachował dobrą spójność stylistyczną.
 
+Pod względem efektywności czasowej i zużycia zasobów, różnice między scenariuszami są wyraźne. Pojedynczy agent ukończył zadanie w 3 minuty przy 9k tokenów, scenariusz dwuagentowy potrzebował 12 minut i 45k tokenów, natomiast system wieloagentowy wymagał 26 minut oraz 85k tokenów. Przy złożonej specyfikacji wzrost kosztu obliczeniowego (prawie dziesięciokrotny w porównaniu z pojedynczym agentem) jest w pełni uzasadniony znaczącym przyrostem jakości — tylko scenariusz 3 osiągnął maksymalne oceny we wszystkich kluczowych kategoriach i uniknął błędów krytycznych.
+
 \begin{table}[h!]
     \centering
     \begin{tabular}{|c|c|c|c|c|}
@@ -162,7 +168,7 @@ Najbardziej złożona specyfikacja wymagała pełnego zespołu wyspecjalizowanyc
 
 Zwiększenie liczby agentów i ich specjalizacji przekłada się na wyższą jakość, ale efekty nie rosną liniowo. Każdy dodatkowy agent wymaga skuteczniejszej koordynacji. Bez niej, wzrost złożoności może prowadzić do regresji w jakości końcowego produktu. Mimo tego systemy agentowe mają realny potencjał w automatyzacji generowania aplikacji, szczególnie gdy stosuje się dobrze przemyślaną specyfikację oraz podział ról między agentami.
 
-Analiza kosztu obliczeniowego wykazała wyraźną zależność między liczbą agentów a zużyciem tokenów. W najprostszym eksperymencie pojedynczy agent zużył 12k tokenów, podczas gdy system wieloagentowy wymagał 45k tokenów (prawie 4-krotny wzrost). W eksperymencie ze złożoną specyfikacją różnica była jeszcze bardziej wyraźna: 78k tokenów dla pojedynczego agenta wobec 267k dla systemu wieloagentowego (ponad 3-krotny wzrost). Wzrost zużycia tokenów wynika z komunikacji między agentami, wielokrotnego przetwarzania kontekstu oraz mechanizmów koordynacji. Należy zatem rozważyć kompromis między jakością rozwiązania a kosztem obliczeniowym, szczególnie w kontekście komercyjnego wykorzystania systemów agentowych.
+Analiza kosztu obliczeniowego wykazała wyraźną zależność między liczbą agentów a zużyciem tokenów oraz czasem wykonania. W najprostszym eksperymencie pojedynczy agent zużył 6k tokenów w 3 minuty, podczas gdy system wieloagentowy wymagał 95k tokenów i 24 minut (prawie szesnastokrotny wzrost tokenów i ośmiokrotny wzrost czasu). W eksperymencie ze specyfikacją podstawową różnice były mniejsze: 8k tokenów w 2 minuty dla pojedynczego agenta wobec 84k tokenów w 25 minut dla systemu wieloagentowego (ponad dziesięciokrotny wzrost w obu metrykach). W eksperymencie ze złożoną specyfikacją: 9k tokenów w 3 minuty dla pojedynczego agenta wobec 85k tokenów w 26 minut dla systemu wieloagentowego (prawie dziesięciokrotny wzrost). Wzrost zużycia tokenów i czasu wynika z komunikacji między agentami, wielokrotnego przetwarzania kontekstu oraz mechanizmów koordynacji. Należy zatem rozważyć kompromis między jakością rozwiązania a kosztem obliczeniowym i czasowym, szczególnie w kontekście komercyjnego wykorzystania systemów agentowych.
 
 Systemy agentowe są więc użyteczne zarówno do szybkiego prototypowania, jak i do tworzenia bardziej złożonych aplikacji, pod warunkiem dobrania architektury do jakości specyfikacji oraz wyposażenia procesu w mechanizmy koordynacji (np. współdzieloną pamięć, inspekcje wyników). Bez nich wzrost liczby agentów nie przekłada się wprost na wyższą jakość rozwiązania.
 
